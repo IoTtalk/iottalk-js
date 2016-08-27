@@ -137,7 +137,7 @@ var dan2 = (function () {
 
         $.ajax({
             'type': 'PUT',
-            'url': url +'/'+ _id,
+            'url': _url +'/'+ _id,
             'data': JSON.stringify({
                 'idf_list': params['idf_list'],
                 'odf_list': params['odf_list'],
@@ -162,7 +162,8 @@ var dan2 = (function () {
                 subscribe(_o_chans.topic('ctrl'));
                 if (callback) {
                     callback({
-                        'url': _url,
+                        'raproto': _url,
+                        'mqtt': metadata['url'],
                         'id': _id,
                     });
                 }
