@@ -131,9 +131,9 @@ var dan2 = (function () {
         _i_chans = new ChannelPool();
         _o_chans = new ChannelPool();
 
-        function on_failure () {
+        function on_failure (err) {
             if (callback) {
-                callback(false);
+                callback(false, err);
             }
         }
 
@@ -202,6 +202,8 @@ var dan2 = (function () {
     return {
         'register': register,
         'push': push,
-        'UUID': UUID,
+        'UUID': function() {
+            return _id;
+        },
     };
 })();
