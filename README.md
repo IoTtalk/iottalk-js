@@ -10,8 +10,6 @@ _dan2.js_ depend on _jQuery_ and _Paho.MQTT_. You can add below three line in yo
 <script src="https://iottalk.github.io/iottalk-js/mqttws31.min.js"></script>
 <script src="https://iottalk.github.io/iottalk-js/dan2.js"></script>
 ```
-_dan2.js_ will export _class DAN_ to global. You can create one on your own by `var myDan = new DAN();`.  
-Due to the need of downward compatibility, _dan.js_ will export an DAN instance to global variable _dan2_.    
 
 ### dan2.register(url, params, init_callback)
 - url (string): IoTtalk 2.0 server.
@@ -25,14 +23,16 @@ Due to the need of downward compatibility, _dan.js_ will export an DAN instance 
 	- accept_protos (array): The accepted protocols list of the device application. ex: `['mqtt']`.
 - init_callback (function): Invoke after registered to IoTtalk server.
 
+#### on_signal
 The purpose of each signal is specify at [here](http://iottalk-spec.readthedocs.io/en/latest/protos/res_control_proto.html#control-signal).  
-**on_signal**, handler for incoming control signal from server, received two parameter:  
+Handler for incoming control signal from server, received two parameter:  
 - command (string): specify which signal it is. For now, only `CONNECT`, `DISCONNECT` are implemented.
 - param (array): An array containing parameter for this command. ex: `['Meow']`  
 
-You should return true or [false, 'reason'] indicate the result after handling this signal.  
+You must always return `true` or `[false, 'reason']` indicate the result after handling this signal.  
 
-**on_data**, handler for incoming odf data signal, received two parameter:  
+#### on_data
+Handler for incoming odf data signal, received two parameter:  
 - odf_name (string): Name of incoming odf data.
 - data: Data of the odf.
 
