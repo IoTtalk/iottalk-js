@@ -1,6 +1,5 @@
 var dan2 = (function () {
     var _url;
-    var _port;
     var _id;
     var _mqtt_host;
     var _mqtt_port;
@@ -124,8 +123,9 @@ var dan2 = (function () {
 
     function register (url, params, callback) {
         _url = url;
-        _port = ('port' in params) ? params['port'] : 9001;
         _id = ('id' in params) ? params['id'] : UUID();
+        _mqtt_host = ('mqtt_host' in params) ? params['mqtt_host'] : location.hostname;
+        _mqtt_port = ('mqtt_port' in params) ? params['mqtt_port'] : 9001;
         _on_signal = params['on_signal'];
         _on_data = params['on_data'];
         _i_chans = new ChannelPool();
@@ -173,8 +173,8 @@ var dan2 = (function () {
             }
 
             _mqtt_client = new Paho.MQTT.Client(
-                _url,
-                _port,
+                _mqtt_host,
+                _mqtt_port,
                 _id
             );
             _mqtt_client.onMessageArrived = on_message;

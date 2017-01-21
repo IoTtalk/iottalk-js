@@ -124,6 +124,8 @@ var dan2 = (function () {
     function register (url, params, callback) {
         _url = url;
         _id = ('id' in params) ? params['id'] : UUID();
+        _mqtt_host = ('mqtt_host' in params) ? params['mqtt_host'] : location.hostname;
+        _mqtt_port = ('mqtt_port' in params) ? params['mqtt_port'] : 9001;
         _on_signal = params['on_signal'];
         _on_data = params['on_data'];
         _i_chans = new ChannelPool();
@@ -144,6 +146,7 @@ var dan2 = (function () {
                 'accept_protos': params['accept_protos'],
             }),
             'contentType': 'application/json',
+            'crossDomain': true,
         }).done(function (metadata) {
             if (typeof metadata === 'string') {
                 metadata = JSON.parse(metadata);
@@ -169,10 +172,9 @@ var dan2 = (function () {
                 }
             }
 
-            // TODO: change host:port to received value
             _mqtt_client = new Paho.MQTT.Client(
-                '140.113.131.81',
-                Number(11883),
+                _mqtt_host,
+                _mqtt_port,
                 _id
             );
             _mqtt_client.onMessageArrived = on_message;
@@ -185,7 +187,9 @@ var dan2 = (function () {
                     true
                 )
             });
-        }).fail(on_failure);
+        }).fail(function(err) {
+            on_failure(false, err);
+        });
     }
 
     function push (idf_name, data) {

@@ -26,7 +26,9 @@ const dai = function (profile, ida) {
         ida.iot_app();
     }
 
-    dan2.register('http://140.113.131.81:9992', {
+    dan2.register('http://140.113.123.218:9992', {
+        'mqtt_host': '140.113.123.218',
+        'mqtt_port': 8000,
         'id': app_id,
         'on_signal': on_signal,
         'on_data': on_data,
