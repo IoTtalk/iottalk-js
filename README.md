@@ -18,8 +18,8 @@ _dan2.js_ depend on _jQuery_ and _Paho.MQTT_. You can add below three line in yo
 	- id (string, optional): Your app uuid. Randomly generate one if not given.
 	- on_signal (function): Invoked when receiving control signal from server. More detail are described at below.
 	- on_data (function): Invoked when odf data coming. More detail are described at below.
-	- idf_list (array, optional): list of idf describtion. ex: `[['Position', ['lat', 'long']]]`. Left this field empty if you don't have. Empty list will get 403 error.
-	- odf_list (array, optional): list of odf describtion. ex: `[['Meow', ['dB']]]`. Left this field empty if you don't have. Empty list will get 403 error.
+	- idf_list (array, optional): list of idf description. ex: `[['Position', ['lat', 'long']]]`. Left this field empty if you don't have. Empty list will get 403 error.
+	- odf_list (array, optional): list of odf description. ex: `[['Meow', ['dB']]]`. Left this field empty if you don't have. Empty list will get 403 error.
 	- accept_protos (array): The accepted protocols list of the device application. ex: `['mqtt']`.
 - init_callback (function): Invoke after registered to IoTtalk server.
 
