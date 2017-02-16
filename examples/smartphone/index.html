@@ -29,38 +29,6 @@
             <span></span>
         </section>
 
-         <section><span>&nbsp;</span></section>
-
-         <section> <h6>Gyroscope</h6> </section>
-         <section id="Rx">
-            <label><i>&alpha;</i></label>
-            <span></span>
-        </section>
-        <section id="Ry">
-            <label><i>&beta;</i></label>
-            <span></span>
-        </section>
-         <section id="Rz">
-            <label><i>&gamma;</i></label>
-            <span></span>
-        </section>
-
-         <section><span>&nbsp;</span></section>
-
-         <section> <h6>Orientation</h6> </section>
-         <section id="Ox">
-            <label><i>&alpha;</i></label>
-            <span></span>
-        </section>
-        <section id="Oy">
-            <label><i>&beta;</i></label>
-            <span></span>
-        </section>
-         <section id="Oz">
-            <label><i>&gamma;</i></label>
-            <span></span>
-        </section>
-
     </main>
 
 
@@ -75,65 +43,23 @@
         var AxDom = $('#Ax > span');
         var AyDom = $('#Ay > span');
         var AzDom = $('#Az > span');
-        var RxDom = $('#Rx > span');
-        var RyDom = $('#Ry > span');
-        var RzDom = $('#Rz > span');
-        var OxDom = $('#Ox > span');
-        var OyDom = $('#Oy > span');
-        var OzDom = $('#Oz > span');
-        var cnt = 0;
    
 
         window.ondevicemotion = function(event) {
             var ax = event.accelerationIncludingGravity.x || 0;
             var ay = event.accelerationIncludingGravity.y || 0;
             var az = event.accelerationIncludingGravity.z || 0;
+
             acc.x = Math.round(ax*accur) / accur;
             acc.y = Math.round(ay*accur) / accur;
             acc.z = Math.round(az*accur) / accur;
 
-            var ra = event.rotationRate.alpha;  
-            var rb = event.rotationRate.beta;
-            var rg = event.rotationRate.gamma;
-            gyro.x = Math.round(rg*accur) / accur;
-            gyro.y = Math.round(ra*accur) / accur;
-            gyro.z = Math.round(rb*accur) / accur;
-            
-            ++cnt;
-            dan2.push('Acceleration', [acc.x, acc.y, acc.z]);
-            dan2.push('Gyroscope', [gyro.x, gyro.y, gyro.z]);
-        }
-
-
-        function handleOrientation(event) {
-            var oa = event.alpha;
-            var ob = event.beta;
-            var og = event.gamma;
-            orient.x = Math.round(oa*accur) / accur;
-            orient.y = Math.round(ob*accur) / accur;
-            orient.z = Math.round(og*accur) / accur;
-
-            dan2.push('Orientation', [orient.x, orient.y, orient.z]);
-        }
-        window.addEventListener('deviceorientation', handleOrientation);
-
-        // Dom updater
-        function domUpdater() {
             AxDom.text(acc.x);
             AyDom.text(acc.y);
             AzDom.text(acc.z);
 
-            RxDom.text(gyro.x);
-            RyDom.text(gyro.y);
-            RzDom.text(gyro.z);
-
-            OxDom.text(orient.x);
-            OyDom.text(orient.y);
-            OzDom.text(orient.z);
-
-            requestAnimationFrame(domUpdater);
+            dan2.push('Acceleration', [acc.x, acc.y, acc.z]);
         }
-        requestAnimationFrame(domUpdater);
 
 
         // Register
@@ -143,7 +69,6 @@
         }
 
         function on_data(idf_name, data) {
-            // No idf
             console.info('[data]', idf_name, data);
         }
 
@@ -152,16 +77,14 @@
             $('#uuid').text(result ? 'Connected' : 'GG');
         }
 
-        dan2.register('http://140.113.123.218:9992', {
-            'mqtt_host': '140.113.123.218',
+        dan2.register('http://127.0.0.1:9992', {
+            'mqtt_host': '127.0.0.1',
             'mqtt_port': 1884,
             'id': 'd72d6b4d-e5ef-4bd7-a37f-e63ee97f96ea',
             'on_signal': on_signal,
             'on_data': on_data,
             'idf_list': [
-                ['Acceleration', ['g']],
-                ['Gyroscope', ['deg']],
-                ['Orientation', ['dir']],
+                ['Acceleration', ['g', 'g', 'g']],
             ],
             'accept_protos': ['mqtt'],
         }, init_callback);
