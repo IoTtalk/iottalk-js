@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="./css/gsensor.css">
     <script src="https://iottalk.github.io/iottalk-js/jquery.js"></script>
     <script src="https://iottalk.github.io/iottalk-js/mqttws31.min.js"></script>
-    <script src="./js/dan2.js"></script>
+    <script src="https://iottalk.github.io/iottalk-js/dan2.js"></script>
 </head>
 <body>
 
@@ -77,15 +77,19 @@
             $('#uuid').text(result ? 'Connected' : 'GG');
         }
 
-        dan2.register('http://127.0.0.1:9992', {
-            'mqtt_host': '127.0.0.1',
+        dan2.register('http://140.113.123.218:9992', {
+            'mqtt_host': '140.113.123.218',
             'mqtt_port': 1884,
-            'id': 'd72d6b4d-e5ef-4bd7-a37f-e63ee97f96ea',
+            'id': '824f7bb0-f790-4c06-96e5-821e92535b52',
+            'name': 'sunset-Smartphone',
             'on_signal': on_signal,
             'on_data': on_data,
             'idf_list': [
                 ['Acceleration', ['g', 'g', 'g']],
             ],
+            'profile': {
+                'model': 'Smartphone',
+            },
             'accept_protos': ['mqtt'],
         }, init_callback);
 
