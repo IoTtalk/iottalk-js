@@ -141,9 +141,11 @@ var dan2 = (function () {
             'type': 'PUT',
             'url': _url +'/'+ _id,
             'data': JSON.stringify({
+                'name': params['name'],
                 'idf_list': params['idf_list'],
                 'odf_list': params['odf_list'],
                 'accept_protos': params['accept_protos'],
+                'profile': params['profile'],
             }),
             'contentType': 'application/json',
             'crossDomain': true,
@@ -159,7 +161,7 @@ var dan2 = (function () {
             function on_connect () {
                 publish(
                     _i_chans.topic('ctrl'),
-                    JSON.stringify({'state': 'online'}),
+                    JSON.stringify({'state': 'online', 'rev': _rev}),
                     true
                 );
                 subscribe(_o_chans.topic('ctrl'));
@@ -183,7 +185,7 @@ var dan2 = (function () {
                 'onFailure': on_failure,
                 'willMessage': mqtt_message(
                     _i_chans.topic('ctrl'),
-                    JSON.stringify({'state': 'broken'}),
+                    JSON.stringify({'state': 'broken', 'rev': _rev}),
                     true
                 )
             });
