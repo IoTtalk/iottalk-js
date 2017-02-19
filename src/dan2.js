@@ -1,15 +1,15 @@
-var mqtt = require('mqtt');
-var request = require('superagent');
-var _url;
-var _id;
-var _mqtt_host;
-var _mqtt_port;
-var _mqtt_client;
-var _i_chans;
-var _o_chans;
-var _on_signal;
-var _on_data;
-var _rev;
+import mqtt from 'mqtt';
+import superagent from 'superagent';
+let _url;
+let _id;
+let _mqtt_host;
+let _mqtt_port;
+let _mqtt_client;
+let _i_chans;
+let _o_chans;
+let _on_signal;
+let _on_data;
+let _rev;
 
 function ChannelPool() {
     this._table = {};
@@ -125,7 +125,7 @@ function register(url, params, callback) {
             callback(false, err);
     }
 
-    request.put(_url +'/'+ _id)
+    superagent.put(_url +'/'+ _id)
         .set('Content-Type', 'application/json')
         .set('Accept', '*/*')
         .send(JSON.stringify({
@@ -135,7 +135,7 @@ function register(url, params, callback) {
             'accept_protos': params['accept_protos'],
             'profile': params['profile'],
         }))
-        .end(function(err, res) {
+        .end((err, res) => {
             if(err) {
                 on_failure(err);
                 return;
@@ -176,9 +176,9 @@ function register(url, params, callback) {
                 },
             });
             _mqtt_client.on('connect', on_connect);
-            _mqtt_client.on('reconnect', function() { console.info('mqtt_reconnect'); });
-            _mqtt_client.on('error', function(err) { console.error('mqtt_error', err); });
-            _mqtt_client.on('message', function(topic, message, packet) {
+            _mqtt_client.on('reconnect', () => { console.info('mqtt_reconnect'); });
+            _mqtt_client.on('error', (err) => { console.error('mqtt_error', err); });
+            _mqtt_client.on('message', (topic, message, packet) => {
                 on_message({
                     'destinationName': topic,
                     'payloadString': message.toString(),
