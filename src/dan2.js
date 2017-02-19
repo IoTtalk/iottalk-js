@@ -1,6 +1,7 @@
 import mqtt from 'mqtt';
 import superagent from 'superagent';
-import uuid from './uuid.js'
+import UUID from './uuid.js'
+import ChannelPool from './channel-pool.js'
 let _url;
 let _id;
 let _mqtt_host;
@@ -11,25 +12,6 @@ let _o_chans;
 let _on_signal;
 let _on_data;
 let _rev;
-
-function ChannelPool() {
-    this._table = {};
-    this._rtable = {};
-    this.add = function(df_name, topic_) {
-        this._table[df_name] = topic_;
-        this._rtable[topic_] = df_name;
-    };
-    this.topic = function(df_name) {
-        return this._table[df_name];
-    };
-    this.remove_df = function(df_name) {
-        delete this._rtable[this._table[df_name]];
-        delete this._table[df_name];
-    };
-    this.df = function(topic_) {
-        return this._rtable[topic_];
-    };
-}
 
 function publish(channel, message, retained) {
     if (!_mqtt_client)
