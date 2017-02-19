@@ -1,5 +1,6 @@
 import mqtt from 'mqtt';
 import superagent from 'superagent';
+import uuid from './uuid.js'
 let _url;
 let _id;
 let _mqtt_host;
@@ -97,16 +98,6 @@ function on_message(msg) {
             return;
         _on_data(odf, JSON.parse(message));
     }
-}
-
-function UUID() {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-        s4() + '-' + s4() + s4() + s4();
 }
 
 function register(url, params, callback) {
