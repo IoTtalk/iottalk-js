@@ -166,6 +166,14 @@ function push(idf_name, data) {
 window.dan2 = {
     'register': register,
     'push': push,
+    get connected() {
+        if( typeof _mqtt_client !== 'object' ) return false;
+        return _mqtt_client.connected;
+    },
+    get reconnecting() {
+        if( typeof _mqtt_client !== 'object' ) return false;
+        return _mqtt_client.reconnecting;
+    },
     'UUID': function() {
         return _id ? _id : UUID();
     },
