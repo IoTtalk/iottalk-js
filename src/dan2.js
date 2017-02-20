@@ -31,9 +31,7 @@ function unsubscribe(channel) {
     _mqtt_client.unsubscribe(channel);
 }
 
-function on_message(msg) {
-    var topic = msg.destinationName;
-    var message = msg.payloadString;
+function on_message(topic, message) {
     if (topic == _o_chans.topic('ctrl')) {
         var signal = JSON.parse(message);
         switch (signal['command']) {
@@ -152,10 +150,8 @@ function register(url, params, callback) {
             _mqtt_client.on('reconnect', () => { console.info('mqtt_reconnect'); });
             _mqtt_client.on('error', (err) => { console.error('mqtt_error', err); });
             _mqtt_client.on('message', (topic, message, packet) => {
-                on_message({
-                    'destinationName': topic,
-                    'payloadString': message.toString(),
-                });
+                // Convert message from Uint8Array to String
+                on_message(topic, message.toString());
             });
 
         });
