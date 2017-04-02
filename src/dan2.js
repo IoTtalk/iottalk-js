@@ -1,7 +1,8 @@
-import mqtt from 'mqtt';
-import superagent from 'superagent';
-import UUID from './uuid.js'
 import ChannelPool from './channel-pool.js'
+import UUID from './uuid.js'
+import mqtt from 'mqtt'
+import superagent from 'superagent'
+
 let _url;
 let _id;
 let _mqtt_host;
