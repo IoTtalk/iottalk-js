@@ -131,9 +131,9 @@ var dan2 = (function () {
         _i_chans = new ChannelPool();
         _o_chans = new ChannelPool();
 
-        function on_failure (err) {
+        function on_failure (invocationContext, errorCode, errorMessage) {
             if (callback) {
-                callback(false, err);
+                callback(false, errorMessage);
             }
         }
 
@@ -190,7 +190,7 @@ var dan2 = (function () {
                 )
             });
         }).fail(function(err) {
-            on_failure(false, err);
+            on_failure(null, null, err);
         });
     }
 
