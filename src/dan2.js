@@ -34,36 +34,37 @@ const unsubscribe = function(channel) {
 
 const on_message = function(topic, message) {
     if (topic == _o_chans.topic('ctrl')) {
-        var signal = JSON.parse(message);
+        let signal = JSON.parse(message);
+        let handling_result = null;
         switch (signal['command']) {
         case 'CONNECT':
             if ('idf' in signal) {
-                var idf = signal['idf'];
+                let idf = signal['idf'];
                 _i_chans.add(idf, signal['topic']);
-                var handling_result = _on_signal(signal['command'], [idf]);
+                handling_result = _on_signal(signal['command'], [idf]);
 
             } else if ('odf' in signal) {
-                var odf = signal['odf'];
+                let odf = signal['odf'];
                 _o_chans.add(odf, signal['topic']);
-                var handling_result = _on_signal(signal['command'], [odf]);
+                handling_result = _on_signal(signal['command'], [odf]);
                 subscribe(_o_chans.topic(odf));
             }
             break;
         case 'DISCONNECT':
             if ('idf' in signal) {
-                var idf = signal['idf'];
+                let idf = signal['idf'];
                 _i_chans.remove_df(idf);
-                var handling_result = _on_signal(signal['command'], [idf]);
+                handling_result = _on_signal(signal['command'], [idf]);
 
             } else if ('odf' in signal) {
-                var odf = signal['odf'];
+                let odf = signal['odf'];
                 unsubscribe(_o_chans.topic(odf));
                 _o_chans.remove_df(odf);
-                var handling_result = _on_signal(signal['command'], [odf]);
+                handling_result = _on_signal(signal['command'], [odf]);
             }
             break;
         }
-        var res_message = {
+        let res_message = {
             'msg_id': signal['msg_id'],
         }
         if (typeof handling_result == 'boolean' && handling_result) {
@@ -74,7 +75,7 @@ const on_message = function(topic, message) {
         }
         publish(_i_chans.topic('ctrl'), JSON.stringify(res_message));
     } else {
-        var odf = _o_chans.df(topic);
+        let odf = _o_chans.df(topic);
         if (!odf)
             return;
         _on_data(odf, JSON.parse(message));
