@@ -13,25 +13,25 @@ let _on_signal;
 let _on_data;
 let _rev;
 
-function publish(channel, message, retained) {
+const publish = function(channel, message, retained) {
     if (!_mqtt_client)
         return;
     _mqtt_client.publish(channel, message, { 'retain': retained });
 }
 
-function subscribe(channel) {
+const subscribe = function(channel) {
     if (!_mqtt_client)
         return;
     _mqtt_client.subscribe(channel);
 }
 
-function unsubscribe(channel) {
+const unsubscribe = function(channel) {
     if (!_mqtt_client)
         return;
     _mqtt_client.unsubscribe(channel);
 }
 
-function on_message(topic, message) {
+const on_message = function(topic, message) {
     if (topic == _o_chans.topic('ctrl')) {
         var signal = JSON.parse(message);
         switch (signal['command']) {
@@ -80,7 +80,7 @@ function on_message(topic, message) {
     }
 }
 
-function register(url, params, callback) {
+const register = function(url, params, callback) {
     _url = url;
     _id = ('id' in params) ? params['id'] : UUID();
     _mqtt_host = ('mqtt_host' in params) ? params['mqtt_host'] : location.hostname;
@@ -90,7 +90,7 @@ function register(url, params, callback) {
     _i_chans = new ChannelPool();
     _o_chans = new ChannelPool();
 
-    function on_failure(err) {
+    const on_failure = function(err) {
         console.error('on_failure', err);
         if (callback)
             callback(false, err);
@@ -157,7 +157,7 @@ function register(url, params, callback) {
         });
 }
 
-function push(idf_name, data) {
+const push = function(idf_name, data) {
     if (!_mqtt_client || !_i_chans.topic(idf_name))
         return;
     publish(_i_chans.topic(idf_name), JSON.stringify(data));
