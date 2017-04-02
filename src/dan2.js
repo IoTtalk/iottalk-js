@@ -114,7 +114,7 @@ const register = function(url, params, callback) {
                 return;
             }
             
-            var metadata = res.body;
+            let metadata = res.body;
             if (typeof metadata === 'string') {
                 metadata = JSON.parse(metadata);
             }
