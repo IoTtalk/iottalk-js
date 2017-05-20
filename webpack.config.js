@@ -1,9 +1,9 @@
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './src/dan2.js',
+    entry: __dirname + '/src/dan2.js',
     output: {
-        path: './build',
+        path: __dirname + '/build',
         filename: 'dan2.js'
     },
     module: {
