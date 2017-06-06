@@ -85,8 +85,6 @@ const on_message = function(topic, message) {
 const register = function(url, params, callback) {
     _url = url;
     _id = ('id' in params) ? params['id'] : UUID();
-    _mqtt_host = ('mqtt_host' in params) ? params['mqtt_host'] : location.hostname;
-    _mqtt_port = ('mqtt_port' in params) ? params['mqtt_port'] : 1994;
     _on_signal = params['on_signal'];
     _on_data = params['on_data'];
     _i_chans = new ChannelPool();
@@ -122,6 +120,8 @@ const register = function(url, params, callback) {
             _i_chans.add('ctrl', metadata['ctrl_chans'][0]);
             _o_chans.add('ctrl', metadata['ctrl_chans'][1]);
             _rev = metadata['rev'];
+            _mqtt_host = metadata.url['host'];
+            _mqtt_port = metadata.url['ws_port'];
 
             function on_connect() {
                 console.info('mqtt_connect');
