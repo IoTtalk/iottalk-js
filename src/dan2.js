@@ -101,8 +101,8 @@ const register = function(url, params, callback) {
         .set('Accept', '*/*')
         .send(JSON.stringify({
             'name': params['name'],
-            'idf_list': params['df_list'] ? params['df_list'] : params['idf_list'],
-            'odf_list': params['df_list'] ? params['df_list'] : params['odf_list'],
+            'idf_list': (params['df_list'] === undefined) ? params['df_list'] : params['idf_list'],
+            'odf_list': (params['df_list'] === undefined) ? params['df_list'] : params['odf_list'],
             'accept_protos': params['accept_protos'],
             'profile': params['profile'],
         }))
