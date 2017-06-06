@@ -101,8 +101,8 @@ const register = function(url, params, callback) {
         .set('Accept', '*/*')
         .send(JSON.stringify({
             'name': params['name'],
-            'idf_list': params['idf_list'],
-            'odf_list': params['odf_list'],
+            'idf_list': params['df_list'] ? params['df_list'] : params['idf_list'],
+            'odf_list': params['df_list'] ? params['df_list'] : params['odf_list'],
             'accept_protos': params['accept_protos'],
             'profile': params['profile'],
         }))
@@ -111,7 +111,7 @@ const register = function(url, params, callback) {
                 on_failure(err);
                 return;
             }
-            
+
             let metadata = res.body;
             if (typeof metadata === 'string') {
                 metadata = JSON.parse(metadata);
@@ -168,6 +168,50 @@ const push = function(idf_name, data) {
 window.dan2 = {
     'register': register,
     'push': push,
+    get connected() {
+        if( typeof _mqtt_client !== 'object' ) return false;
+        return _mqtt_client.connected;
+    },
+    get reconnecting() {
+        if( typeof _mqtt_client !== 'object' ) return false;
+        return _mqtt_client.reconnecting;
+    },
+    'UUID': function() {
+        return _id ? _id : UUID();
+    },
+};
+
+window.dan = { //for 1
+    'register': register,
+    'push': push,
+    'init': function(pull, endpoint, mac_addr, profile, callback) {
+        function on_data (odf_name, data) {
+            if (!(Object.prototype.toString.call(data) === "[object Array]")) {
+                data = [data];
+            }
+            pull(odf_name, data);
+        }
+
+        function on_signal (cmd, param) {
+            console.log('[cmd]', cmd, param);
+            return true;
+        }
+
+        profile['on_signal'] = on_signal;
+        profile['on_data'] = on_data;
+        profile['accept_protos'] = ['mqtt'];
+        profile['profile'] = {'model': profile['dm_name']};
+
+        if (!profile['name']){
+            profile['name'] = profile['dm_name'] + '_' + Math.floor(Math.random() * 100);
+        }
+
+        register(endpoint, profile, callback);
+    },
+    'deregister': function(callback) {
+        _mqtt_client.disconnect();
+        callback();
+    },
     get connected() {
         if( typeof _mqtt_client !== 'object' ) return false;
         return _mqtt_client.connected;
