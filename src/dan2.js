@@ -147,7 +147,7 @@ const register = function(url, params, callback) {
                     'payload': JSON.stringify({'state': 'broken', 'rev': _rev}),
                     'retain': true,
                 },
-                'keepalive': 60
+                'keepalive': 10
             });
             _mqtt_client.on('connect', on_connect);
             _mqtt_client.on('reconnect', () => { console.info('mqtt_reconnect'); });
