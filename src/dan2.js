@@ -136,6 +136,7 @@ const register = function(url, params, callback) {
                         'raproto': _url,
                         'mqtt': metadata['url'],
                         'id': _id,
+                        'd_name': metadata['name'],
                     });
                 }
             }
