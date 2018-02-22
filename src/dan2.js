@@ -159,6 +159,19 @@ const register = function(url, params, callback) {
         });
 }
 
+const deregister = function(callback) {
+    if (!_mqtt_client) {
+        callback(true);
+        return;
+    }
+    _mqtt_client.disconnect();
+    superagent.delete(_url + '/' + _id);
+
+    if (callback) {
+        callback(true);
+    }
+}
+
 const push = function(idf_name, data) {
     if (!_mqtt_client || !_i_chans.topic(idf_name))
         return;
@@ -167,6 +180,7 @@ const push = function(idf_name, data) {
 
 window.dan2 = {
     'register': register,
+    'deregister': deregister,
     'push': push,
     get connected() {
         if( typeof _mqtt_client !== 'object' ) return false;
