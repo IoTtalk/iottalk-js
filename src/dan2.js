@@ -10,6 +10,8 @@ let _mqtt_port;
 let _mqtt_client;
 let _i_chans;
 let _o_chans;
+let _ctrl_i;
+let _ctrl_o;
 let _on_signal;
 let _on_data;
 let _rev;
@@ -33,7 +35,7 @@ const unsubscribe = function(channel) {
 }
 
 const on_message = function(topic, message) {
-    if (topic == _o_chans.topic('ctrl')) {
+    if (topic == _ctrl_o) {
         let signal = JSON.parse(message);
         let handling_result = null;
         switch (signal['command']) {
@@ -73,7 +75,7 @@ const on_message = function(topic, message) {
             res_message['state'] = 'error';
             res_message['reason'] = handling_result[1];
         }
-        publish(_i_chans.topic('ctrl'), JSON.stringify(res_message));
+        publish(_ctrl_i, JSON.stringify(res_message));
     } else {
         let odf = _o_chans.df(topic);
         if (!odf)
@@ -116,21 +118,22 @@ const register = function(url, params, callback) {
             if (typeof metadata === 'string') {
                 metadata = JSON.parse(metadata);
             }
-
-            _i_chans.add('ctrl', metadata['ctrl_chans'][0]);
-            _o_chans.add('ctrl', metadata['ctrl_chans'][1]);
             _rev = metadata['rev'];
+            _ctrl_i = metadata['ctrl_chans'][0];
+            _ctrl_o = metadata['ctrl_chans'][1];
             _mqtt_host = metadata.url['host'];
             _mqtt_port = metadata.url['ws_port'];
 
             function on_connect() {
                 console.info('mqtt_connect');
+                _i_chans.remove_all_df();
+                _o_chans.remove_all_df();
                 publish(
-                    _i_chans.topic('ctrl'),
+                    _ctrl_i,
                     JSON.stringify({'state': 'online', 'rev': _rev}),
-                    true
+                    true //What does this param mean
                 );
-                subscribe(_o_chans.topic('ctrl'));
+                subscribe(_ctrl_o);
                 if (callback) {
                     callback({
                         'raproto': _url,
@@ -144,8 +147,8 @@ const register = function(url, params, callback) {
             _mqtt_client = mqtt.connect('mqtt://'+_mqtt_host+':'+_mqtt_port, {
                 'clientId': _id,
                 'will': {
-                    'topic': _i_chans.topic('ctrl'),
-                    'payload': JSON.stringify({'state': 'broken', 'rev': _rev}),
+                    'topic': _ctrl_i,
+                    'payload': JSON.stringify({'state': 'offline', 'rev': _rev}),
                     'retain': true,
                 },
             });
@@ -165,8 +168,11 @@ const deregister = function(callback) {
         callback(true);
         return;
     }
-    _mqtt_client.disconnect();
-    superagent.delete(_url + '/' + _id);
+    publish(
+        _ctrl_i,
+        JSON.stringify({'state': 'deregister', 'rev': _rev})
+    );
+    //_mqtt_client.disconnect();
 
     if (callback) {
         callback(true);

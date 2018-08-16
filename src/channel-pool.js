@@ -18,6 +18,11 @@ export default class {
         delete this._rtable[this._table[df_name]];
         delete this._table[df_name];
     }
+
+    remove_all_df() {
+        this._rtable = {};
+        this._table = {};
+    }
     
     df(topic_) {
         return this._rtable[topic_];
