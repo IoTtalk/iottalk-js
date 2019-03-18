@@ -7,6 +7,7 @@ let _url;
 let _id;
 let _mqtt_host;
 let _mqtt_port;
+let _mqtt_scheme;
 let _mqtt_client;
 let _i_chans;
 let _o_chans;
@@ -113,8 +114,9 @@ const register = function(url, params, callback) {
                 on_failure(err);
                 return;
             }
-            
+
             let metadata = res.body;
+            console.debug('register metadata', metadata);
             if (typeof metadata === 'string') {
                 metadata = JSON.parse(metadata);
             }
@@ -123,6 +125,7 @@ const register = function(url, params, callback) {
             _ctrl_o = metadata['ctrl_chans'][1];
             _mqtt_host = metadata.url['host'];
             _mqtt_port = metadata.url['ws_port'];
+            _mqtt_scheme = metadata.url['ws_scheme'];
 
             function on_connect() {
                 console.info('mqtt_connect');
@@ -144,7 +147,7 @@ const register = function(url, params, callback) {
                 }
             }
 
-            _mqtt_client = mqtt.connect('mqtt://'+_mqtt_host+':'+_mqtt_port, {
+            _mqtt_client = mqtt.connect(_mqtt_scheme + '://' + _mqtt_host + ':' + _mqtt_port, {
                 'clientId': _id,
                 'will': {
                     'topic': _ctrl_i,
