@@ -27,8 +27,6 @@ const dai = function (profile, ida) {
     }
 
     dan2.register('http://140.113.123.218:9992', {
-        'mqtt_host': '140.113.123.218',
-        'mqtt_port': 8000,
         'id': app_id,
         'on_signal': on_signal,
         'on_data': on_data,
