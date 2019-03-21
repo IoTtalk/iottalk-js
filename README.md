@@ -40,6 +40,11 @@ Handler for incoming odf data signal, received two parameter:
 - data: Data of the idf.
 
 ## Development
-All source codes of _dan2.js_ are located in directory _src/_. Make sure you have installed `npm`.  
-Run `npm install` in order to install dependency.  
-Run `webpack` to build _dan2.js_ to _build/dan2.js_.
+
+```
+npm install
+npm run build
+```
+
+For nodejs only build, there is a target `build:node`.
+For web only build, there is a target `build:web`.
