@@ -20,7 +20,13 @@ let _rev;
 const publish = function(channel, message, retained) {
     if (!_mqtt_client)
         return;
-    _mqtt_client.publish(channel, message, { 'retain': retained });
+    if (retained === undefined)
+        retained = false;
+
+    _mqtt_client.publish(channel, message, {
+        retain: retained,
+        qos: 1,
+    });
 }
 
 const subscribe = function(channel) {
