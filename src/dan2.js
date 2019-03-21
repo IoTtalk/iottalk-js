@@ -140,7 +140,7 @@ export const register = function(url, params, callback) {
                 publish(
                     _ctrl_i,
                     JSON.stringify({'state': 'online', 'rev': _rev}),
-                    true //What does this param mean
+                    true // retained message
                 );
                 subscribe(_ctrl_o);
                 if (callback) {
