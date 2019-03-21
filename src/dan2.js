@@ -157,7 +157,6 @@ export const register = function(url, params, callback) {
 
       _mqtt_client = mqtt.connect(_mqtt_scheme + '://' + _mqtt_host + ':' + _mqtt_port, {
         clientId: 'mqttjs_' + _id,
-        protocolVersion: 3.1.1,
         will: {
           topic: _ctrl_i,
           payload: JSON.stringify({'state': 'offline', 'rev': _rev}),
