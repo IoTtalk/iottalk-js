@@ -23,9 +23,8 @@ export default class {
         this._rtable = {};
         this._table = {};
     }
-    
+
     df(topic_) {
         return this._rtable[topic_];
     }
-
-}
+};

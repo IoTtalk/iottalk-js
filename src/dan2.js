@@ -1,5 +1,5 @@
 import ChannelPool from './channel-pool.js'
-import UUID from './uuid.js'
+import _UUID from './uuid.js'
 import mqtt from 'mqtt'
 import superagent from 'superagent'
 
@@ -20,7 +20,13 @@ let _rev;
 const publish = function(channel, message, retained) {
     if (!_mqtt_client)
         return;
-    _mqtt_client.publish(channel, message, { 'retain': retained });
+    if (retained === undefined)
+        retained = false;
+
+    _mqtt_client.publish(channel, message, {
+        retain: retained,
+        qos: 1,
+    });
 }
 
 const subscribe = function(channel) {
@@ -85,9 +91,9 @@ const on_message = function(topic, message) {
     }
 }
 
-const register = function(url, params, callback) {
+export const register = function(url, params, callback) {
     _url = url;
-    _id = ('id' in params) ? params['id'] : UUID();
+    _id = ('id' in params) ? params['id'] : _UUID();
     _on_signal = params['on_signal'];
     _on_data = params['on_data'];
     _i_chans = new ChannelPool();
@@ -134,7 +140,7 @@ const register = function(url, params, callback) {
                 publish(
                     _ctrl_i,
                     JSON.stringify({'state': 'online', 'rev': _rev}),
-                    true //What does this param mean
+                    true // retained message
                 );
                 subscribe(_ctrl_o);
                 if (callback) {
@@ -166,7 +172,7 @@ const register = function(url, params, callback) {
         });
 }
 
-const deregister = function(callback) {
+export const deregister = function(callback) {
     if (!_mqtt_client) {
         callback(true);
         return;
@@ -182,25 +188,22 @@ const deregister = function(callback) {
     }
 }
 
-const push = function(idf_name, data) {
+export const push = function(idf_name, data) {
     if (!_mqtt_client || !_i_chans.topic(idf_name))
         return;
     publish(_i_chans.topic(idf_name), JSON.stringify(data));
 }
 
-window.dan2 = {
-    'register': register,
-    'deregister': deregister,
-    'push': push,
-    get connected() {
+export const UUID = function() {
+  return _id ? _id : _UUID();
+}
+
+export const connected = function() {
         if( typeof _mqtt_client !== 'object' ) return false;
         return _mqtt_client.connected;
-    },
-    get reconnecting() {
+}
+
+export const reconnecting = function() {
         if( typeof _mqtt_client !== 'object' ) return false;
         return _mqtt_client.reconnecting;
-    },
-    'UUID': function() {
-        return _id ? _id : UUID();
-    },
-};
+}
