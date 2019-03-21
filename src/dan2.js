@@ -18,182 +18,181 @@ let _on_data;
 let _rev;
 
 const publish = function(channel, message, retained) {
-    if (!_mqtt_client)
-        return;
-    if (retained === undefined)
-        retained = false;
+  if (!_mqtt_client)
+    return;
+  if (retained === undefined)
+    retained = false;
 
-    _mqtt_client.publish(channel, message, {
-        retain: retained,
-        qos: 1,
-    });
+  _mqtt_client.publish(channel, message, {
+    retain: retained,
+    qos: 1,
+  });
 }
 
 const subscribe = function(channel) {
-    if (!_mqtt_client)
-        return;
-    _mqtt_client.subscribe(channel);
+  if (!_mqtt_client)
+    return;
+  return _mqtt_client.subscribe(channel);
 }
 
 const unsubscribe = function(channel) {
-    if (!_mqtt_client)
-        return;
-    _mqtt_client.unsubscribe(channel);
+  if (!_mqtt_client)
+    return;
+  return _mqtt_client.unsubscribe(channel);
 }
 
 const on_message = function(topic, message) {
-    if (topic == _ctrl_o) {
-        let signal = JSON.parse(message);
-        let handling_result = null;
-        switch (signal['command']) {
-        case 'CONNECT':
-            if ('idf' in signal) {
-                let idf = signal['idf'];
-                _i_chans.add(idf, signal['topic']);
-                handling_result = _on_signal(signal['command'], [idf]);
+  if (topic == _ctrl_o) {
+    let signal = JSON.parse(message);
+    let handling_result = null;
+    switch (signal['command']) {
+      case 'CONNECT':
+        if ('idf' in signal) {
+          let idf = signal['idf'];
+          _i_chans.add(idf, signal['topic']);
+          handling_result = _on_signal(signal['command'], [idf]);
 
-            } else if ('odf' in signal) {
-                let odf = signal['odf'];
-                _o_chans.add(odf, signal['topic']);
-                handling_result = _on_signal(signal['command'], [odf]);
-                subscribe(_o_chans.topic(odf));
-            }
-            break;
-        case 'DISCONNECT':
-            if ('idf' in signal) {
-                let idf = signal['idf'];
-                _i_chans.remove_df(idf);
-                handling_result = _on_signal(signal['command'], [idf]);
+        } else if ('odf' in signal) {
+          let odf = signal['odf'];
+          _o_chans.add(odf, signal['topic']);
+          handling_result = _on_signal(signal['command'], [odf]);
+          subscribe(_o_chans.topic(odf));
+        }
+        break;
+      case 'DISCONNECT':
+        if ('idf' in signal) {
+          let idf = signal['idf'];
+          _i_chans.remove_df(idf);
+          handling_result = _on_signal(signal['command'], [idf]);
 
-            } else if ('odf' in signal) {
-                let odf = signal['odf'];
-                unsubscribe(_o_chans.topic(odf));
-                _o_chans.remove_df(odf);
-                handling_result = _on_signal(signal['command'], [odf]);
-            }
-            break;
+        } else if ('odf' in signal) {
+          let odf = signal['odf'];
+          unsubscribe(_o_chans.topic(odf));
+          _o_chans.remove_df(odf);
+          handling_result = _on_signal(signal['command'], [odf]);
         }
-        let res_message = {
-            'msg_id': signal['msg_id'],
-        }
-        if (typeof handling_result == 'boolean' && handling_result) {
-            res_message['state'] = 'ok';
-        } else {
-            res_message['state'] = 'error';
-            res_message['reason'] = handling_result[1];
-        }
-        // console.log('on_signal: res_message', res_message)
-        publish(_ctrl_i, JSON.stringify(res_message));
-    } else {
-        let odf = _o_chans.df(topic);
-        if (!odf)
-            return;
-        _on_data(odf, JSON.parse(message));
+        break;
     }
+    let res_message = {
+      'msg_id': signal['msg_id'],
+    }
+    if (typeof handling_result == 'boolean' && handling_result) {
+      res_message['state'] = 'ok';
+    } else {
+      res_message['state'] = 'error';
+      res_message['reason'] = handling_result[1];
+    }
+    publish(_ctrl_i, JSON.stringify(res_message));
+    return;
+  }
+  else {
+    let odf = _o_chans.df(topic);
+    if (!odf)
+      return;
+    _on_data(odf, JSON.parse(message));
+  }
 }
 
 export const register = function(url, params, callback) {
-    _url = url;
-    _id = ('id' in params) ? params['id'] : _UUID();
-    _on_signal = params['on_signal'];
-    _on_data = params['on_data'];
-    _i_chans = new ChannelPool();
-    _o_chans = new ChannelPool();
+  _url = url;
+  _id = ('id' in params) ? params['id'] : _UUID();
+  _on_signal = params['on_signal'];
+  _on_data = params['on_data'];
+  _i_chans = new ChannelPool();
+  _o_chans = new ChannelPool();
 
-    const on_failure = function(err) {
-        console.error('on_failure', err);
-        if (callback)
-            callback(false, err);
-    }
+  const on_failure = function(err) {
+    console.error('on_failure', err);
+    if (callback)
+      callback(false, err);
+  }
 
-    superagent.put(_url +'/'+ _id)
-        .set('Content-Type', 'application/json')
-        .set('Accept', '*/*')
-        .send(JSON.stringify({
-            'name': params['name'],
-            'idf_list': params['idf_list'],
-            'odf_list': params['odf_list'],
-            'accept_protos': params['accept_protos'],
-            'profile': params['profile'],
-        }))
-        .end((err, res) => {
-            if(err) {
-                on_failure(err);
-                return;
-            }
+  superagent.put(_url +'/'+ _id)
+    .set('Content-Type', 'application/json')
+    .set('Accept', '*/*')
+    .send(JSON.stringify({
+      'name': params['name'],
+      'idf_list': params['idf_list'],
+      'odf_list': params['odf_list'],
+      'accept_protos': params['accept_protos'],
+      'profile': params['profile'],
+    }))
+    .end((err, res) => {
+      if(err) {
+        on_failure(err);
+        return;
+      }
 
-            let metadata = res.body;
-            console.debug('register metadata', metadata);
-            if (typeof metadata === 'string') {
-                metadata = JSON.parse(metadata);
-            }
-            _rev = metadata['rev'];
-            _ctrl_i = metadata['ctrl_chans'][0];
-            _ctrl_o = metadata['ctrl_chans'][1];
-            _mqtt_host = metadata.url['host'];
-            _mqtt_port = metadata.url['ws_port'];
-            _mqtt_scheme = metadata.url['ws_scheme'];
+      let metadata = res.body;
+      console.debug('register metadata', metadata);
+      if (typeof metadata === 'string') {
+        metadata = JSON.parse(metadata);
+      }
+      _rev = metadata['rev'];
+      _ctrl_i = metadata['ctrl_chans'][0];
+      _ctrl_o = metadata['ctrl_chans'][1];
+      _mqtt_host = metadata.url['host'];
+      _mqtt_port = metadata.url['ws_port'];
+      _mqtt_scheme = metadata.url['ws_scheme'];
 
-            function on_connect() {
-                console.info('mqtt_connect');
-                _i_chans.remove_all_df();
-                _o_chans.remove_all_df();
-                publish(
-                    _ctrl_i,
-                    JSON.stringify({'state': 'online', 'rev': _rev}),
-                    true // retained message
-                );
-                subscribe(_ctrl_o);
-                if (callback) {
-                    callback({
-                        'raproto': _url,
-                        'mqtt': metadata['url'],
-                        'id': _id,
-                        'd_name': metadata['name'],
-                    });
-                }
-            }
+      function on_connect() {
+        console.info('mqtt_connect');
+        _i_chans.remove_all_df();
+        _o_chans.remove_all_df();
+        publish(
+          _ctrl_i,
+          JSON.stringify({'state': 'online', 'rev': _rev}),
+          true // retained message
+        );
+        subscribe(_ctrl_o);
+        if (callback) {
+          callback({
+            'raproto': _url,
+            'mqtt': metadata['url'],
+            'id': _id,
+            'd_name': metadata['name'],
+          });
+        }
+      }
 
-            _mqtt_client = mqtt.connect(_mqtt_scheme + '://' + _mqtt_host + ':' + _mqtt_port, {
-                clientId: 'mqttjs_' + _id,
-                protocolVersion: 3.1.1,
-                will: {
-                    topic: _ctrl_i,
-                    payload: JSON.stringify({'state': 'offline', 'rev': _rev}),
-                    retain: true,
-                },
-            });
-            _mqtt_client.on('connect', on_connect);
-            _mqtt_client.on('reconnect', () => { console.info('mqtt_reconnect'); });
-            _mqtt_client.on('error', (err) => { console.error('mqtt_error', err); });
-            _mqtt_client.on('message', (topic, message, packet) => {
-                // Convert message from Uint8Array to String
-                on_message(topic, message.toString());
-            });
+      _mqtt_client = mqtt.connect(_mqtt_scheme + '://' + _mqtt_host + ':' + _mqtt_port, {
+        clientId: 'mqttjs_' + _id,
+        protocolVersion: 3.1.1,
+        will: {
+          topic: _ctrl_i,
+          payload: JSON.stringify({'state': 'offline', 'rev': _rev}),
+          retain: true,
+        },
+      });
+      _mqtt_client.on('connect', on_connect);
+      _mqtt_client.on('reconnect', () => { console.info('mqtt_reconnect'); });
+      _mqtt_client.on('error', (err) => { console.error('mqtt_error', err); });
+      _mqtt_client.on('message', (topic, message, packet) => {
+        // Convert message from Uint8Array to String
+        on_message(topic, message.toString());
+      });
 
-        });
+    });
 }
 
 export const deregister = function(callback) {
-    if (!_mqtt_client) {
-        callback(true);
-        return;
-    }
-    publish(
-        _ctrl_i,
-        JSON.stringify({'state': 'deregister', 'rev': _rev})
-    );
-    //_mqtt_client.disconnect();
+  if (!_mqtt_client)
+    return callback(true);
 
-    if (callback) {
-        callback(true);
-    }
+  publish(
+    _ctrl_i,
+    JSON.stringify({'state': 'deregister', 'rev': _rev})
+  );
+  _mqtt_client.end();
+
+  if (callback)
+    return callback(true);
 }
 
 export const push = function(idf_name, data) {
-    if (!_mqtt_client || !_i_chans.topic(idf_name))
-        return;
-    publish(_i_chans.topic(idf_name), JSON.stringify(data));
+  if (!_mqtt_client || !_i_chans.topic(idf_name))
+    return;
+  publish(_i_chans.topic(idf_name), JSON.stringify(data));
 }
 
 export const UUID = function() {
@@ -201,11 +200,11 @@ export const UUID = function() {
 }
 
 export const connected = function() {
-        if( typeof _mqtt_client !== 'object' ) return false;
-        return _mqtt_client.connected;
+  if( typeof _mqtt_client !== 'object' ) return false;
+  return _mqtt_client.connected;
 }
 
 export const reconnecting = function() {
-        if( typeof _mqtt_client !== 'object' ) return false;
-        return _mqtt_client.reconnecting;
+  if( typeof _mqtt_client !== 'object' ) return false;
+  return _mqtt_client.reconnecting;
 }
