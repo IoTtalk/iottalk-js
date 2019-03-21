@@ -82,6 +82,7 @@ const on_message = function(topic, message) {
             res_message['state'] = 'error';
             res_message['reason'] = handling_result[1];
         }
+        // console.log('on_signal: res_message', res_message)
         publish(_ctrl_i, JSON.stringify(res_message));
     } else {
         let odf = _o_chans.df(topic);
@@ -154,11 +155,12 @@ export const register = function(url, params, callback) {
             }
 
             _mqtt_client = mqtt.connect(_mqtt_scheme + '://' + _mqtt_host + ':' + _mqtt_port, {
-                'clientId': _id,
-                'will': {
-                    'topic': _ctrl_i,
-                    'payload': JSON.stringify({'state': 'offline', 'rev': _rev}),
-                    'retain': true,
+                clientId: 'mqttjs_' + _id,
+                protocolVersion: 3.1.1,
+                will: {
+                    topic: _ctrl_i,
+                    payload: JSON.stringify({'state': 'offline', 'rev': _rev}),
+                    retain: true,
                 },
             });
             _mqtt_client.on('connect', on_connect);
