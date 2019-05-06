@@ -17,22 +17,29 @@ let _on_signal;
 let _on_data;
 let _rev;
 
-const publish = function(channel, message, retained) {
+const publish = function(channel, message, retained, qos) {
   if (!_mqtt_client)
+  {
+    console.warn('unable to publish without _mqtt_client');
     return;
+  }
   if (retained === undefined)
     retained = false;
+  if (qos === undefined)
+    qos = 2;
 
   _mqtt_client.publish(channel, message, {
     retain: retained,
-    qos: 1,
+    qos: qos,
   });
 }
 
-const subscribe = function(channel) {
+const subscribe = function(channel, qos) {
   if (!_mqtt_client)
     return;
-  return _mqtt_client.subscribe(channel);
+  if (qos === undefined)
+    qos = 2;
+  return _mqtt_client.subscribe(channel, {qos: qos});
 }
 
 const unsubscribe = function(channel) {
@@ -159,7 +166,8 @@ export const register = function(url, params, callback) {
         clientId: 'mqttjs_' + _id,
         will: {
           topic: _ctrl_i,
-          payload: JSON.stringify({'state': 'offline', 'rev': _rev}),
+          // in most case of js DA, it never connect back
+          payload: JSON.stringify({'state': 'broken', 'rev': _rev}),
           retain: true,
         },
       });
@@ -188,10 +196,12 @@ export const deregister = function(callback) {
     return callback(true);
 }
 
-export const push = function(idf_name, data) {
+export const push = function(idf_name, data, qos) {
   if (!_mqtt_client || !_i_chans.topic(idf_name))
     return;
-  publish(_i_chans.topic(idf_name), JSON.stringify(data));
+  if(qos === undefined)
+    qos = 1;
+  publish(_i_chans.topic(idf_name), JSON.stringify(data), false, qos);
 }
 
 export const UUID = function() {
