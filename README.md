@@ -11,14 +11,8 @@ _dan2.js_ provide you with the ability to connect with IoTtalk v2.
 The library will export a global variable `window.dan2`.
 We provide minified file served from GitHub pages:
 
-The stable build:
 ```html
 <script src="https://iottalk.github.io/iottalk-js/dan2-v2.0.2.js"></script>
-```
-
-The latest build:
-```html
-<script src="https://iottalk.github.io/iottalk-js/dan2.js"></script>
 ```
 
 ### Install via NPM or Yarn

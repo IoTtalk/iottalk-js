@@ -16,11 +16,7 @@ script:
 # https://docs.travis-ci.com/user/deployment/pages/
 
 before_deploy:
-  - mv ./build-web/dan2-web.js ./build-web/dan2.js
-  - cp ./build-web/dan2.js ./build-web/dan2-${TRAVIS_COMMIT}.js
-  - if [ "${TRAVIS_TAG}" ]; then
-      cp ./build-web/dan2.js ./build-web/dan2-${TRAVIS_TAG}.js;
-    fi
+  - cp ./build-web/dan2-web.js ./build-web/dan2-${TRAVIS_TAG}.js
 
 deploy:
   provider: pages
