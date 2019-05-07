@@ -30,4 +30,5 @@ deploy:
   local_dir:
     - ./build-web
   on:
+    tags: true
     branch: master
