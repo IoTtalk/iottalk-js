@@ -17,8 +17,8 @@ script:
 
 before_deploy:
   - export DISTDIR=/tmp/dist
-  - git fetch origin gh-pages
-  - git worktree add ${DISTDIR} origin/gh-pages
+  - git fetch origin gh-pages:gh-pages
+  - git worktree add ${DISTDIR} gh-pages
   - cp ./build-web/dan2-web.js ${DISTDIR}/dan2.js
   - cp ./build-web/dan2-web.js ${DISTDIR}/dan2-${TRAVIS_COMMIT}.js
   - if [ "${TRAVIS_TAG}" ]; then
