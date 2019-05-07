@@ -1,5 +1,7 @@
 # IoTtalk2.0 Javascript SDK
 
+[![Build Status](https://travis-ci.com/IoTtalk/iottalk-js.svg?branch=master)](https://travis-ci.com/IoTtalk/iottalk-js)
+
 Provide DAN of IoTtalk2.0 and some examples.
 
 
