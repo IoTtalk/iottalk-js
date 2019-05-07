@@ -7,6 +7,7 @@
     "example": "examples"
   },
   "scripts": {
+    "start": "npx webpack -w --mode development",
     "build": "npm run build:node && npm run build:web",
     "build:node": "npx babel src --out-dir build-node && npx ncc build build-node/dan2.js -o build-node/dist && mv build-node/dist/index.js build-node/dist/dan2.js",
     "build:web": "npx webpack",
