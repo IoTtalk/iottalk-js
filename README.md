@@ -15,6 +15,8 @@ We provide minified file served from GitHub pages:
 <script src="https://iottalk.github.io/iottalk-js/dan2-v2.0.2.js"></script>
 ```
 
+The build artifacts are here: https://github.com/IoTtalk/iottalk-js/tree/gh-pages
+
 ### Install via NPM or Yarn
 
 ```
