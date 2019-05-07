@@ -17,6 +17,7 @@ script:
 
 before_deploy:
   - export DISTDIR=/tmp/dist
+  - git fetch origin gh-pages
   - git worktree add ${DISTDIR} origin/gh-pages
   - cp ./build-web/dan2-web.js ${DISTDIR}/dan2.js
   - cp ./build-web/dan2-web.js ${DISTDIR}/dan2-${TRAVIS_COMMIT}.js
