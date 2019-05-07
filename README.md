@@ -73,3 +73,11 @@ yarn run build
 
 For nodejs only build, there is a target `build:node`.
 For web only build, there is a target `build:web`.
+
+### Publishing NPM package
+
+```
+yarn login
+yarn run build
+yarn publish
+```
