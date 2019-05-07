@@ -31,5 +31,6 @@ deploy:
   keep_history: true
   local_dir: /tmp/dist
   on:
-    tags: true
-    branch: master
+    branch:
+      - master
+      - /v(\d+)\.(\d+).(\d+)/
