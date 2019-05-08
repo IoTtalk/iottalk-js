@@ -12,7 +12,7 @@ The library will export a global variable `window.dan2`.
 We provide minified file served from GitHub pages:
 
 ```html
-<script src="https://iottalk.github.io/iottalk-js/dan2-v2.0.2.js"></script>
+<script src="https://iottalk.github.io/iottalk-js/dan2-v2.0.4.js"></script>
 ```
 
 The build artifacts are here: https://github.com/IoTtalk/iottalk-js/tree/gh-pages
