@@ -21,7 +21,10 @@ before_deploy:
   - git worktree add ${DISTDIR} gh-pages
   - cp ./build-web/dan2-web.js ${DISTDIR}/dan2.js
   - cp ./build-web/dan2-web.js ${DISTDIR}/dan2-${TRAVIS_COMMIT}.js
+  - echo "TRAVIS_TAG = ${TRAVIS_TAG}"
+  - echo "TRAVIS_BRANCH = ${TRAVIS_BRANCH}"
   - if [ "${TRAVIS_TAG}" ]; then
+      echo 'Add tags build';
       cp ./build-web/dan2-web.js ${DISTDIR}/dan2-${TRAVIS_TAG}.js;
     fi
 
@@ -32,6 +35,5 @@ deploy:
   keep_history: true
   local_dir: /tmp/dist
   on:
-    branch:
-      - master
-      - /^v\d+\.\d+.\d+$/
+    all_branches: true
+    condition: $TRAVIS_BRANCH == "master" || -n $TRAVIS_TAG

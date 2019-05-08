@@ -188,7 +188,7 @@ export const deregister = function(callback) {
 
   publish(
     _ctrl_i,
-    JSON.stringify({'state': 'deregister', 'rev': _rev})
+    JSON.stringify({'state': 'offline', 'rev': _rev})
   );
   _mqtt_client.end();
 
