@@ -191,7 +191,6 @@ export const deregister = function(callback) {
     JSON.stringify({'state': 'offline', 'rev': _rev})
   );
   _mqtt_client.end();
-  superagent.delete(_url + '/' + _id);
 
   if (callback)
     return callback(true);
