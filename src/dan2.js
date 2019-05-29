@@ -183,14 +183,29 @@ export const register = function(url, params, callback) {
 }
 
 export const deregister = function(callback) {
-  if (!_mqtt_client)
-    return callback(true);
+  if (!_mqtt_client) {
+    if (callback)
+      callback(true);
+    return;
+  }
 
   publish(
     _ctrl_i,
     JSON.stringify({'state': 'offline', 'rev': _rev})
   );
   _mqtt_client.end();
+  superagent.del(_url +'/'+ _id)
+    .set('Content-Type', 'application/json')
+    .set('Accept', '*/*')
+    .send(JSON.stringify({'rev': _rev}))
+    .end((err, res) => {
+      if(err) {
+        console.error('deregister fail', err);
+        if (callback)
+          callback(false, err);
+        return;
+      }
+    });
 
   if (callback)
     return callback(true);
