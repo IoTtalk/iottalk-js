@@ -186,6 +186,7 @@ export const deregister = function(callback) {
   if (!_mqtt_client) {
     if (callback)
       return callback(true);
+    return;
   }
 
   publish(
