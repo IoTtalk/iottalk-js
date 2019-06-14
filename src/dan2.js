@@ -185,8 +185,7 @@ export const register = function(url, params, callback) {
 export const deregister = function(callback) {
   if (!_mqtt_client) {
     if (callback)
-      callback(true);
-    return;
+      return callback(true);
   }
 
   publish(
@@ -202,8 +201,7 @@ export const deregister = function(callback) {
       if(err) {
         console.error('deregister fail', err);
         if (callback)
-          callback(false, err);
-        return;
+          return callback(false, err);
       }
     });
 
