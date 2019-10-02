@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Smartphone</title>
     <link rel="stylesheet" type="text/css" href="./css/gsensor.css">
-    <script src="https://iottalk.github.io/iottalk-js/jquery.js"></script>
-    <script src="/build/dan2.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"></script>
+    <script src="/build/dan2-web.js"></script>
 </head>
 <body>
 
@@ -47,7 +50,7 @@
         var AxDom = $('#Ax > span');
         var AyDom = $('#Ay > span');
         var AzDom = $('#Az > span');
-   
+
 
         window.ondevicemotion = function(event) {
             var ax = event.accelerationIncludingGravity.x || 0;
@@ -81,7 +84,7 @@
             $('#uuid').text(result ? 'Connected' : 'GG');
         }
 
-        dan2.register('http://140.113.123.218:9992', {
+        dan2.register('https://example.com/csm', {
             'name': device_name,
             'on_signal': on_signal,
             'on_data': on_data,
