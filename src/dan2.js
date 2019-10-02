@@ -167,7 +167,7 @@ export const register = function(url, params, callback) {
         will: {
           topic: _ctrl_i,
           // in most case of js DA, it never connect back
-          payload: JSON.stringify({'state': 'broken', 'rev': _rev}),
+          payload: JSON.stringify({'state': 'offline', 'rev': _rev}),
           retain: true,
         },
       });
