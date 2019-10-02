@@ -22,6 +22,7 @@ $(function () {
         'odf_list': [
             [color, ['rgb', 'rgb', 'rgb']]
         ],
+        'model': 'Bulb',
     }
 
     var ida = {
@@ -29,6 +30,7 @@ $(function () {
     };
 
     $(window).mousemove(function (evt) {
+        console.debug("mousemove triggered")
         coord(evt.clientX, evt.clientY);
     });
 

@@ -28,7 +28,7 @@
   "homepage": "https://github.com/IoTtalk/iottalk-js#readme",
   "dependencies": {
     "mqtt": "3.0.0",
-    "superagent": "^4.1.0"
+    "superagent": "5.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
