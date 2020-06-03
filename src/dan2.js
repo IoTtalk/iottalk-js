@@ -112,18 +112,28 @@ export const register = function(url, params, callback) {
     console.error('on_failure', err);
     if (callback)
       callback(false, err);
-  }
+  };
 
-  superagent.put(_url +'/'+ _id)
-    .set('Content-Type', 'application/json')
-    .set('Accept', '*/*')
-    .send(JSON.stringify({
-      'name': params['name'],
-      'idf_list': params['idf_list'],
-      'odf_list': params['odf_list'],
-      'accept_protos': params['accept_protos'],
-      'profile': params['profile'],
-    }))
+  let payload = {
+    'name': params['name'],
+    'idf_list': params['idf_list'],
+    'odf_list': params['odf_list'],
+    'accept_protos': params['accept_protos'],
+    'profile': params['profile'],
+  };
+
+  // filter out the empty `df_list`, in case of empty list, server reponsed 403.
+  ['idf_list', 'odf_list'].forEach(
+    x => {
+      if (Array.isArray(payload[x]) && payload[x].length == 0)
+        delete payload[x];
+    }
+  );
+
+  superagent.put(_url + '/' + _id)
+    .type('json')
+    .accept('json')
+    .send(payload)
     .end((err, res) => {
       if(err) {
         on_failure(err);

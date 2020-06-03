@@ -41,11 +41,11 @@ yarn add iottalk-js
 - url (`string`): IoTtalk 2.0 server.
 - param (`object`):
     - port (`number`, optional): MQTT websocket server's port. Default set to 1994.
-    - id (`string`, optional): Your app uuid. Randomly generate one if not given. __Should be in valid UUID format__.
+    - id (`string`, optional): The UUID of your app. Randomly generate one if not given. It should be in valid UUID format.
     - on_signal (`function`): Invoked when receiving control signal from server. More detail are described at below.
     - on_data (`function`): Invoked when odf data coming. More detail are described at below.
-    - idf_list (`array`, optional): list of idf description. ex: `[['Position', ['lat', 'long']]]`. Skip this field if you don't have. __Empty list will get 403 error__.
-    - odf_list (`array`, optional): list of odf description. ex: `[['Meow', ['dB']]]`. Skip this field if you don't have. __Empty list will get 403 error__.
+    - idf_list (`array`, optional): list of idf description. ex: `[['Position', ['lat', 'long']]]`. Skip this field if you don't have.
+    - odf_list (`array`, optional): list of odf description. ex: `[['Meow', ['dB']]]`. Skip this field if you don't have.
     - accept_protos (`array`): The accepted protocols list of the device application. ex: `['mqtt']`.
 - init_callback (`function`): Invoke after registering to IoTtalk server.
 
