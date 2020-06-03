@@ -41,7 +41,7 @@ yarn add iottalk-js
 - url (`string`): IoTtalk 2.0 server.
 - param (`object`):
     - port (`number`, optional): MQTT websocket server's port. Default set to 1994.
-    - id (`string`, optional): Your app uuid. Randomly generate one if not given.
+    - id (`string`, optional): Your app uuid. Randomly generate one if not given. __Should be in valid UUID format__.
     - on_signal (`function`): Invoked when receiving control signal from server. More detail are described at below.
     - on_data (`function`): Invoked when odf data coming. More detail are described at below.
     - idf_list (`array`, optional): list of idf description. ex: `[['Position', ['lat', 'long']]]`. Skip this field if you don't have. __Empty list will get 403 error__.
