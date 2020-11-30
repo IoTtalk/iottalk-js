@@ -180,6 +180,7 @@ export const register = function(url, params, callback) {
           payload: JSON.stringify({'state': 'offline', 'rev': _rev}),
           retain: true,
         },
+        keepalive: 30,  // seems 60 is problematic for default mosquitto setup 
       });
       _mqtt_client.on('connect', on_connect);
       _mqtt_client.on('reconnect', () => { console.info('mqtt_reconnect'); });
