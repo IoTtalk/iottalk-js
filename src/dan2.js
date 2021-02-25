@@ -23,12 +23,12 @@ const publish = function (channel, message, retained, qos) {
     });
 }
 
-const subscribe = function (channel, qos) {
+const subscribe = function (channel, callback, qos) {
     if (!ctx.mqtt_client)
         return;
     if (qos === undefined)
         qos = 2;
-    return ctx.mqtt_client.subscribe(channel, { qos: qos });
+    return ctx.mqtt_client.subscribe(channel, { qos: qos }, callback);
 }
 
 const unsubscribe = function (channel) {
@@ -42,7 +42,11 @@ const on_connect = function () {
         console.log('Successfully connect to %s', ctx.url);
         console.log('Device ID: %s.', ctx.app_id);
         console.log('Device name: %s.', ctx.name);
-        subscribe(ctx.o_chans['ctrl']);
+        subscribe(ctx.o_chans['ctrl'], (err, granted) => {
+            if (err) {
+                throw 'Subscribe to control channel failed';
+            }
+        });
     }
     else {
         console.info('Reconnect: %s.', ctx.name);
@@ -51,19 +55,9 @@ const on_connect = function () {
             JSON.stringify({ 'state': 'offline', 'rev': ctx.rev }),
             true // retained message
         );
-        // for (const k in ctx.o_chans) {
-        //     if (typeof ctx.o_chans[k] != 'object') {
-        //         subscribe(ctx.o_chans[k]);
-        //     }
-        //     else {
-        //         for (const topic in ctx.o_chans[k]) {
-        //             subscribe(topic);
-        //         }
-        //     }
-        // }
     }
-    // ctx.i_chans.remove_all_df();
-    // ctx.o_chans.remove_all_df();
+    ctx.i_chans.remove_all_df();
+    ctx.o_chans.remove_all_df();
 
     publish(
         ctx.i_chans['ctrl'],
@@ -73,7 +67,7 @@ const on_connect = function () {
 
     _is_reconnect = true;
 
-    if (ctx.on_connect != null) {
+    if (ctx.on_connect) {
         ctx.on_connect();
     }
 }
@@ -132,7 +126,7 @@ const on_message = function (topic, message) {
 
 const on_disconnect = function () {
     console.info('%s (%s) disconnected from  %s.', ctx.name, ctx.app_id, ctx.url);
-    if (ctx.on_disconnect != null) {
+    if (ctx.on_disconnect) {
         ctx.on_disconnect();
     }
 }
@@ -141,12 +135,12 @@ export const register = function (url, params, callback) {
     ctx = new Context();
 
     if (ctx.mqtt_client) {
-        console.error('Already registered');
+        throw 'Already registered';
     }
 
     ctx.url = url;
     if (url == null || url == '') {
-        console.error('Invalid url: %s', ctx.url);
+        throw ('Invalid url: %s', ctx.url);
     }
 
     ctx.app_id = params['id'] ? params['id'] : _UUID();
@@ -161,7 +155,7 @@ export const register = function (url, params, callback) {
 
     let _reg_msg = 'register_callback is deprecated, please use `on_register` instead.';
     if (typeof params['on_register'] != 'undefined' && typeof params['register_callback'] != 'undefined') {
-        console.error(_reg_msg);
+        throw _reg_msg;
     }
     else if (typeof params['on_register'] != 'undefined') {
         ctx.on_register = params['on_register'];
@@ -176,11 +170,6 @@ export const register = function (url, params, callback) {
     ctx.on_connect = params['on_connect'];
     ctx.on_disconnect = params['on_disconnect'];
 
-    const on_failure = function (err) {
-        console.error('on_failure', err);
-        if (callback)
-            callback(false, err);
-    };
 
     // filter out the empty `df_list`, in case of empty list, server reponsed 403.
     ['idf_list', 'odf_list'].forEach(
@@ -196,7 +185,9 @@ export const register = function (url, params, callback) {
         .send(body)
         .end((err, res) => {
             if (err) {
-                on_failure(err);
+                console.error('on_failure', err);
+                if (callback)
+                    callback(false, err);
                 return;
             }
 
@@ -210,7 +201,7 @@ export const register = function (url, params, callback) {
             ctx.mqtt_host = metadata['url']['host'];
             ctx.mqtt_port = metadata['url']['ws_port'];
             ctx.mqtt_username = metadata['username'] ? metadata['username'] : '';
-            ctx.mqtt_password = metadata['password']? metadata['password'] : '';
+            ctx.mqtt_password = metadata['password'] ? metadata['password'] : '';
             ctx.i_chans['ctrl'] = metadata['ctrl_chans'][0];
             ctx.o_chans['ctrl'] = metadata['ctrl_chans'][1];
             ctx.rev = metadata['rev'];
@@ -260,7 +251,7 @@ export const register = function (url, params, callback) {
     ctx.on_signal = params['on_signal'];
     ctx.on_data = params['on_data'];
 
-    if (ctx.on_register != null) {
+    if (ctx.on_register) {
         ctx.on_register();
     }
     console.log(ctx);
@@ -280,25 +271,23 @@ export const deregister = function (callback) {
         true
     );
     ctx.mqtt_client.end();
+
     superagent.del(ctx.url + '/' + ctx.app_id)
-        .set('Content-Type', 'application/json')
-        .set('Accept', '*/*')
+        .type('json')
+        .accept('json')
         .send(JSON.stringify({ 'rev': ctx.rev }))
-        .end((err, res) => {
-            if (err) {
-                console.error('deregister fail', err);
-                if (callback)
-                    return callback(false, err);
+        .then(res => {
+            ctx.mqtt_client = null;
+            if (ctx.on_deregister) {
+                ctx.on_deregister();
             }
+            if (callback)
+                return callback(true);
+        }, err => {
+            console.error('deregister fail', err);
+            if (callback)
+                return callback(false);
         });
-    ctx.mqtt_client = null;
-
-    if (ctx.on_deregister != null) {
-        ctx.on_deregister();
-    }
-
-    if (callback)
-        return callback(true);
 }
 
 export const push = function (idf_name, data, qos) {
@@ -315,7 +304,7 @@ export const push = function (idf_name, data, qos) {
     if (typeof data != 'object') {
         data = [data];
     }
-    
+
     publish(ctx.i_chans.topic(idf_name), JSON.stringify(data), false, qos);
 }
 
