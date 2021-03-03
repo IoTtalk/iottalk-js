@@ -1,4 +1,5 @@
-import DeviceFeature from './device-feature.js'
+import DeviceFeature from './device-feature.js';
+import {push , register , deregister} from './dan2.js'
 
 let api_url;
 let device_model;
@@ -53,13 +54,13 @@ export const dai = function (profile, ida) {
             (() => {
                 if (flags[df_name]) {
                     let _data = device_features[df_name].push_data();
-                    dan2.push(df_name, _data);
+                    push(df_name, _data);
                 }
                 else {
-                    clearInterval(intervalID)
+                    clearInterval(intervalID);
                 }
             }), _df_interval
-        )
+        );
     }
 
     function on_signal(signal, df_list) {
@@ -110,7 +111,7 @@ export const dai = function (profile, ida) {
 
     if (persistent_binding && !device_addr)
         throw 'In case of `persistent_binding` set to `True`, ' +
-        'the `device_addr` should be set and fixed.'
+        'the `device_addr` should be set and fixed.';
 
     if (Object.keys(device_features).length === 0)
         throw 'Neither idf_list nor odf_list is empty.';
@@ -142,16 +143,16 @@ export const dai = function (profile, ida) {
                 return on_disconnect;
             }
         }
-    }
+    };
 
     console.log(msg);
 
-    dan2.register(api_url, msg, init_callback);
+    register(api_url, msg, init_callback);
 
     window.onbeforeunload = function () {
         try {
             if (!persistent_binding) {
-                dan2.deregister();
+                deregister();
             }
         } catch (error) {
             console.error('dai process cleanup exception: %s', error);
