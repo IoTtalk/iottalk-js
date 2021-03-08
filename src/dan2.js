@@ -1,15 +1,15 @@
-import Context from './context.js'
-import _UUID from './uuid.js'
-import mqtt from 'mqtt'
-import superagent from 'superagent'
+import Context from './context.js';
+import _UUID from './uuid.js';
+import mqtt from 'mqtt';
+import superagent from 'superagent';
 
 let ctx;
+let _first_publish = false;
 let _is_reconnect = false;
 
 const publish = function (channel, message, retained, qos) {
     if (!ctx.mqtt_client) {
-        console.warn('unable to publish without ctx.mqtt_client');
-        return;
+        throw 'unable to publish without ctx.mqtt_client';
     }
     if (retained === undefined)
         retained = false;
@@ -59,11 +59,15 @@ const on_connect = function () {
     ctx.i_chans.remove_all_df();
     ctx.o_chans.remove_all_df();
 
-    publish(
+    ctx.mqtt_client.publish(
         ctx.i_chans['ctrl'],
         JSON.stringify({ 'state': 'online', 'rev': ctx.rev }),
-        true // retained message
-    );
+        { retain: true, qos: 2, },
+        (err) => {
+            if (!err) {
+                _first_publish = true;
+            }
+        });
 
     _is_reconnect = true;
 
@@ -106,7 +110,7 @@ const on_message = function (topic, message) {
         }
         let res_message = {
             'msg_id': signal['msg_id'],
-        }
+        };
         if (typeof handling_result == 'boolean' && handling_result) {
             res_message['state'] = 'ok';
         } else {
@@ -179,20 +183,20 @@ export const register = function (url, params, callback) {
         }
     );
 
-    superagent.put(ctx.url + '/' + ctx.app_id)
-        .type('json')
-        .accept('json')
-        .send(body)
-        .end((err, res) => {
-            if (err) {
-                console.error('on_failure', err);
-                if (callback)
-                    callback(false, err);
-                return;
-            }
-
+    new Promise(
+        (resolve, reject) => {
+            superagent.put(ctx.url + '/' + ctx.app_id)
+                .type('json')
+                .accept('json')
+                .send(body)
+                .then(res => {
+                    resolve(res);
+                }, err => {
+                    reject(err);
+                });
+        })
+        .then(res => {
             let metadata = res.body;
-            console.debug('register metadata', metadata);
             if (typeof metadata === 'string') {
                 metadata = JSON.parse(metadata);
             }
@@ -216,7 +220,7 @@ export const register = function (url, params, callback) {
                     payload: JSON.stringify({ 'state': 'offline', 'rev': ctx.rev }),
                     retain: true,
                 },
-                keepalive: 30,  // seems 60 is problematic for default mosquitto setup 
+                keepalive: 30,  // seems 60 is problematic for default mosquitto setup
             });
 
             ctx.mqtt_client.on('connect', (connack) => {
@@ -224,10 +228,8 @@ export const register = function (url, params, callback) {
                 on_connect();
                 if (callback) {
                     callback({
-                        'raproto': ctx.url,
-                        'mqtt': metadata['url'],
-                        'id': ctx.app_id,
-                        'd_name': metadata['name'],
+                        'metadata': metadata,
+                        'dan': ctx
                     });
                 }
             });
@@ -242,19 +244,27 @@ export const register = function (url, params, callback) {
                 console.error('mqtt_error', error);
             });
             ctx.mqtt_client.on('message', (topic, message, packet) => {
-                // Convert message from Uint8Array to String
-                on_message(topic, message.toString());
+                on_message(topic, message.toString()); // Convert message from Uint8Array to String
             });
 
+            ctx.on_signal = params['on_signal'];
+            ctx.on_data = params['on_data'];
+
+            setTimeout(() => {
+                if (!_first_publish) {
+                    throw 'MQTT connection timeout';
+                }
+            }, 5000);
+
+            if (ctx.on_register) {
+                ctx.on_register();
+            }
+        }, err => {
+            console.error('on_failure', err);
+            if (callback)
+                callback(false, err);
+            return;
         });
-
-    ctx.on_signal = params['on_signal'];
-    ctx.on_data = params['on_data'];
-
-    if (ctx.on_register) {
-        ctx.on_register();
-    }
-    console.log(ctx);
 }
 
 export const deregister = function (callback) {
@@ -291,7 +301,7 @@ export const deregister = function (callback) {
 }
 
 export const push = function (idf_name, data, qos) {
-    if (!ctx.mqtt_client) {
+    if (!ctx.mqtt_client || !_first_publish) {
         console.error('Not registered');
         return;
     }

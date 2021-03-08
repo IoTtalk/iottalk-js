@@ -50,14 +50,14 @@ export const dai = function (profile, ida) {
             return;
         let _df_interval = interval[df_name] ? interval[df_name] : push_interval;
         console.debug('%s : %s [message / %s ms]', df_name, flags[df_name], _df_interval);
-        let intervalID = setInterval(
+        let _push_interval = setInterval(
             (() => {
                 if (flags[df_name]) {
                     let _data = device_features[df_name].push_data();
                     push(df_name, _data);
                 }
                 else {
-                    clearInterval(intervalID);
+                    clearInterval(_push_interval);
                 }
             }), _df_interval
         );
@@ -145,7 +145,7 @@ export const dai = function (profile, ida) {
         }
     };
 
-    console.log(msg);
+    console.log('dai' , msg);
 
     register(api_url, msg, init_callback);
 
