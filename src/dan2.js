@@ -2,6 +2,7 @@ import Context from './context.js';
 import _UUID from './uuid.js';
 import mqtt from 'mqtt';
 import superagent from 'superagent';
+import { RegistrationError } from './exceptions.js'
 
 let ctx;
 let _first_publish = false;
@@ -139,27 +140,27 @@ export const register = function (url, params, callback) {
     ctx = new Context();
 
     if (ctx.mqtt_client) {
-        throw 'Already registered';
+        throw new RegistrationError('Already registered');
     }
 
     ctx.url = url;
-    if (url == null || url == '') {
-        throw ('Invalid url: %s', ctx.url);
+    if (!ctx.url || ctx.url == '') {
+        throw new RegistrationError(`Invalid url: ${ctx.url}`);
     }
 
-    ctx.app_id = params['id'] ? params['id'] : _UUID();
+    ctx.app_id = params['id'] || _UUID();
 
     let body = {
         'name': params['name'],
         'idf_list': params['idf_list'],
         'odf_list': params['odf_list'],
-        'accept_protos': params['accept_protos'] ? params['accept_protos'] : 'mqtt',
+        'accept_protos': params['accept_protos'] || 'mqtt',
         'profile': params['profile'],
     };
 
     let _reg_msg = 'register_callback is deprecated, please use `on_register` instead.';
     if (typeof params['on_register'] != 'undefined' && typeof params['register_callback'] != 'undefined') {
-        throw _reg_msg;
+        throw new RegistrationError(_reg_msg);
     }
     else if (typeof params['on_register'] != 'undefined') {
         ctx.on_register = params['on_register'];
@@ -204,8 +205,8 @@ export const register = function (url, params, callback) {
             ctx.name = metadata['name'];
             ctx.mqtt_host = metadata['url']['host'];
             ctx.mqtt_port = metadata['url']['ws_port'];
-            ctx.mqtt_username = metadata['username'] ? metadata['username'] : '';
-            ctx.mqtt_password = metadata['password'] ? metadata['password'] : '';
+            ctx.mqtt_username = metadata['username'] || '';
+            ctx.mqtt_password = metadata['password'] || '';
             ctx.i_chans['ctrl'] = metadata['ctrl_chans'][0];
             ctx.o_chans['ctrl'] = metadata['ctrl_chans'][1];
             ctx.rev = metadata['rev'];
@@ -252,7 +253,7 @@ export const register = function (url, params, callback) {
 
             setTimeout(() => {
                 if (!_first_publish) {
-                    throw 'MQTT connection timeout';
+                    throw new RegistrationError('MQTT connection timeout');
                 }
             }, 5000);
 
@@ -269,10 +270,9 @@ export const register = function (url, params, callback) {
 
 export const deregister = function (callback) {
     if (!ctx.mqtt_client) {
-        console.error('Not registered');
         if (callback)
-            return callback(true);
-        return;
+            callback(false);
+        throw new RegistrationError('Not registered');
     }
 
     publish(
@@ -302,8 +302,7 @@ export const deregister = function (callback) {
 
 export const push = function (idf_name, data, qos) {
     if (!ctx.mqtt_client || !_first_publish) {
-        console.error('Not registered');
-        return;
+        throw new RegistrationError('Not registered');
     }
     if (!ctx.i_chans.topic(idf_name)) {
         return;
@@ -319,7 +318,7 @@ export const push = function (idf_name, data, qos) {
 }
 
 export const UUID = function () {
-    return ctx.app_id ? ctx.app_id : _UUID();
+    return ctx.app_id || _UUID();
 }
 
 export const connected = function () {

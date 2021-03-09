@@ -1,5 +1,6 @@
 import DeviceFeature from './device-feature.js';
-import {push , register , deregister} from './dan2.js'
+import { push, register, deregister } from './dan2.js'
+import { RegistrationError, ArgumentError } from './exceptions.js'
 
 let api_url;
 let device_model;
@@ -27,10 +28,10 @@ export const dai = function (profile, ida) {
     device_model = profile['device_model'];
     device_addr = profile['device_addr'];
     device_name = profile['device_name'];
-    persistent_binding = profile['persistent_binding'] ? profile['persistent_binding'] : false;
+    persistent_binding = profile['persistent_binding'] || false;
     username = profile['username'];
-    extra_setup_webpage = profile['extra_setup_webpage'] ? profile['extra_setup_webpage'] : '';
-    device_webpage = profile['device_webpage'] ? profile['device_webpage'] : '';
+    extra_setup_webpage = profile['extra_setup_webpage'] || '';
+    device_webpage = profile['device_webpage'] || '';
 
     register_callback = profile['register_callback'];
     on_register = profile['on_register'];
@@ -38,8 +39,8 @@ export const dai = function (profile, ida) {
     on_connect = profile['on_connect'];
     on_disconnect = profile['on_disconnect'];
 
-    push_interval = profile['push_interval'] ? profile['push_interval'] : 1;
-    interval = profile['interval'] ? profile['interval'] : {};
+    push_interval = profile['push_interval'] || 1;
+    interval = profile['interval'] || {};
 
     parse_df_profile(profile, 'idf');
     parse_df_profile(profile, 'odf');
@@ -48,7 +49,7 @@ export const dai = function (profile, ida) {
     function push_data(df_name) {
         if (device_features[df_name].push_data == null)
             return;
-        let _df_interval = interval[df_name] ? interval[df_name] : push_interval;
+        let _df_interval = interval[df_name] || push_interval;
         console.debug('%s : %s [message / %s ms]', df_name, flags[df_name], _df_interval);
         let _push_interval = setInterval(
             (() => {
@@ -104,17 +105,17 @@ export const dai = function (profile, ida) {
     }
 
     if (!api_url)
-        throw 'api_url is required';
+        throw new RegistrationError('api_url is required.');
 
     if (!device_model)
-        throw 'device_model not given.';
+        throw new RegistrationError('device_model not given.');
 
     if (persistent_binding && !device_addr)
-        throw 'In case of `persistent_binding` set to `True`, ' +
-        'the `device_addr` should be set and fixed.';
+        throw new ArgumentError('In case of `persistent_binding` set to `True`, ' +
+            'the `device_addr` should be set and fixed.');
 
     if (Object.keys(device_features).length === 0)
-        throw 'Neither idf_list nor odf_list is empty.';
+        throw new RegistrationError('Neither idf_list nor odf_list is empty.');
 
     let msg = {
         'on_signal': on_signal,
@@ -145,7 +146,7 @@ export const dai = function (profile, ida) {
         }
     };
 
-    console.log('dai' , msg);
+    console.log('dai', msg);
 
     register(api_url, msg, init_callback);
 
@@ -179,7 +180,7 @@ const parse_df_profile = function (profile, typ) {
             profile[`${typ}_list`][i][0] = profile[`${typ}_list`][i][0].name;
         }
         else {
-            throw `Invalid ${typ}_list, usage: [df_name, ...] or [[df_name, type], ...]`;
+            throw new RegistrationError(`Invalid ${typ}_list, usage: [df_name, ...] or [[df_name, type], ...]`);
         }
 
         let df = new DeviceFeature({
