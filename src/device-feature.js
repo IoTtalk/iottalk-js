@@ -1,4 +1,4 @@
-import { ArgumentError } from './exceptions.js'
+import { ArgumentError } from './exceptions.js';
 export default class {
 
     constructor(params) {
@@ -8,6 +8,10 @@ export default class {
         }
 
         this.df_type = params['df_type'];  // idf | odf
+        if (this.df_type != 'idf' && this.df_type != 'odf') {
+            throw new ArgumentError(`${this.df_name} df_type must be "idf" or "odf"`);
+        }
+
         this.param_type = params['param_type'] || [null];
 
         this.on_data = null

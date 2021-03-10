@@ -2,7 +2,7 @@ import Context from './context.js';
 import _UUID from './uuid.js';
 import mqtt from 'mqtt';
 import superagent from 'superagent';
-import { RegistrationError } from './exceptions.js'
+import { RegistrationError } from './exceptions.js';
 
 let ctx;
 let _first_publish = false;
@@ -40,9 +40,9 @@ const unsubscribe = function (channel) {
 
 const on_connect = function () {
     if (!_is_reconnect) {
-        console.log('Successfully connect to %s', ctx.url);
-        console.log('Device ID: %s.', ctx.app_id);
-        console.log('Device name: %s.', ctx.name);
+        console.log(`Successfully connect to ${ctx.url}`);
+        console.log(`Device ID: ${ctx.app_id}`);
+        console.log(`Device name: ${ctx.name}.`);
         subscribe(ctx.o_chans['ctrl'], (err, granted) => {
             if (err) {
                 throw 'Subscribe to control channel failed';
@@ -50,7 +50,7 @@ const on_connect = function () {
         });
     }
     else {
-        console.info('Reconnect: %s.', ctx.name);
+        console.info(`Reconnect: ${ctx.name}.`);
         publish(
             ctx.i_chans['ctrl'],
             JSON.stringify({ 'state': 'offline', 'rev': ctx.rev }),
@@ -130,7 +130,7 @@ const on_message = function (topic, message) {
 }
 
 const on_disconnect = function () {
-    console.info('%s (%s) disconnected from  %s.', ctx.name, ctx.app_id, ctx.url);
+    console.info(`${ctx.name} (${ctx.app_id}) disconnected from  ${ctx.url}.`);
     if (ctx.on_disconnect) {
         ctx.on_disconnect();
     }
@@ -186,7 +186,7 @@ export const register = function (url, params, callback) {
 
     new Promise(
         (resolve, reject) => {
-            superagent.put(ctx.url + '/' + ctx.app_id)
+            superagent.put(`${ctx.url}/${ctx.app_id}`)
                 .type('json')
                 .accept('json')
                 .send(body)
@@ -211,8 +211,8 @@ export const register = function (url, params, callback) {
             ctx.o_chans['ctrl'] = metadata['ctrl_chans'][1];
             ctx.rev = metadata['rev'];
 
-            ctx.mqtt_client = mqtt.connect(metadata.url['ws_scheme'] + '://' + ctx.mqtt_host + ':' + ctx.mqtt_port, {
-                clientId: 'iottalk-js-' + ctx.app_id,
+            ctx.mqtt_client = mqtt.connect(`${metadata.url['ws_scheme']}://${ctx.mqtt_host}:${ctx.mqtt_port}`, {
+                clientId: `iottalk-js-${ctx.app_id}`,
                 username: ctx.mqtt_username,
                 password: ctx.mqtt_password,
                 will: {
@@ -282,7 +282,7 @@ export const deregister = function (callback) {
     );
     ctx.mqtt_client.end();
 
-    superagent.del(ctx.url + '/' + ctx.app_id)
+    superagent.del(`${ctx.url}/${ctx.app_id}`)
         .type('json')
         .accept('json')
         .send(JSON.stringify({ 'rev': ctx.rev }))

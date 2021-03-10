@@ -20,6 +20,5 @@ export default class {
         this.on_deregister = null;
         this.on_connect = null;
         this.on_disconnect = null;
-        // this._mqueue = queue.Queue()  # storing the MQTTMessageInfo from ``publish``
     }
 }

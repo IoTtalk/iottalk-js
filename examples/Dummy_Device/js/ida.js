@@ -28,5 +28,5 @@ $(function () {
     var ida = {
         'ida_init': ida_init,
     };
-    iottalkjs.dai(profile, ida);
+    new iottalkjs.dai(profile).run(ida);
 });
