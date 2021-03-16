@@ -2,14 +2,14 @@ $(function () {
     function Dummy_Sensor() {
         var number = Math.floor((1 + Math.random()) * 0x10000);
         $('.IDF_value')[0].innerText = number;
-        return number;
+        return [number];
     }
 
     function Dummy_Control(data) {
         $('.ODF_value')[0].innerText = data[0];
     }
 
-    var profile = {
+    var option = {
         'api_url': 'https://iottalk2.tw/csm',
         'device_model': 'Dummy_Device',
         'device_addr': 'c96ca71c-9e48-2a23-2868-acb420a2f105',
@@ -22,11 +22,5 @@ $(function () {
         }
     };
 
-    /*******************************************************************/
-    function ida_init() {
-    }
-    var ida = {
-        'ida_init': ida_init,
-    };
-    new iottalkjs.dai(profile).run(ida);
+    new iottalkjs.dai(option).run();
 });

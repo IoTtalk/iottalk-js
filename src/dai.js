@@ -3,24 +3,24 @@ import { push, register, deregister } from './dan.js';
 import { RegistrationError, ArgumentError } from './exceptions.js';
 
 export default class {
-    constructor(profile) {
-        this.api_url = profile['api_url'];
-        this.device_model = profile['device_model'];
-        this.device_addr = profile['device_addr'];
-        this.device_name = profile['device_name'];
-        this.persistent_binding = profile['persistent_binding'] || false;
-        this.username = profile['username'];
-        this.extra_setup_webpage = profile['extra_setup_webpage'] || '';
-        this.device_webpage = profile['device_webpage'] || '';
+    constructor(option) {
+        this.api_url = option['api_url'];
+        this.device_model = option['device_model'];
+        this.device_addr = option['device_addr'];
+        this.device_name = option['device_name'];
+        this.persistent_binding = option['persistent_binding'] || false;
+        this.username = option['username'];
+        this.extra_setup_webpage = option['extra_setup_webpage'] || '';
+        this.device_webpage = option['device_webpage'] || '';
 
-        this.register_callback = profile['register_callback'];
-        this.on_register = profile['on_register'];
-        this.on_deregister = profile['on_deregister'];
-        this.on_connect = profile['on_connect'];
-        this.on_disconnect = profile['on_disconnect'];
+        this.register_callback = option['register_callback'];
+        this.on_register = option['on_register'];
+        this.on_deregister = option['on_deregister'];
+        this.on_connect = option['on_connect'];
+        this.on_disconnect = option['on_disconnect'];
 
-        this.push_interval = profile['push_interval'];
-        this.interval = profile['interval'] || {};
+        this.push_interval = typeof option['push_interval'] != 'undefined' ? option['push_interval'] : 1;
+        this.interval = option['interval'] || {};
 
         this.device_features = {};
         this.flags = {};
@@ -28,31 +28,29 @@ export default class {
         this.on_signal = this.on_signal.bind(this);
         this.on_data = this.on_data.bind(this);
 
-        this.parse_df_profile(profile, 'idf');
-        this.parse_df_profile(profile, 'odf');
+        this.parse_df_profile(option, 'idf');
+        this.parse_df_profile(option, 'odf');
     }
 
     push_data(df_name) {
         if (this.device_features[df_name].push_data == null)
             return;
-        if (typeof this.push_interval === 'undefined') {
-            this.push_interval = 1;
-        }
         let _df_interval = this.interval[df_name] || this.push_interval;
-        console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} ms]`);
+        console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} s]`);
         let _push_interval = setInterval(() => {
-            if (this.flags[df_name]) {
-                let _data = this.device_features[df_name].push_data();
-                push(df_name, _data);
-            }
-            else {
+            let _data = this.device_features[df_name].push_data();
+            console.log(_data);
+            if (!this.flags[df_name] && typeof _data != 'undefined') {
                 clearInterval(_push_interval);
             }
-        }, _df_interval);
+            else {
+                push(df_name, _data);
+            }
+        }, _df_interval * 1000);
     }
 
     on_signal(signal, df_list) {
-        console.log(`Receive signal : ${signal}, ${df_list}`);
+        console.log(`Receive signal: ${signal}, ${df_list}`);
         if ('CONNECT' == signal) {
             df_list.forEach(df_name => {
                 if (!this.flags[df_name]) {
@@ -100,7 +98,7 @@ export default class {
             throw new RegistrationError('Neither idf_list nor odf_list is empty.');
     }
 
-    run(ida) {
+    run() {
         this._check_parameter();
 
         let idf_list = [];
@@ -147,7 +145,6 @@ export default class {
         register(this.api_url, msg, (result) => {
             console.log('register', result);
             document.title = this.device_name;
-            ida.ida_init();
         });
 
         window.onbeforeunload = function () {
@@ -161,23 +158,23 @@ export default class {
         };
     }
 
-    parse_df_profile(profile, typ) {
-        for (let i = 0; i < profile[`${typ}_list`].length; i++) {
+    parse_df_profile(option, typ) {
+        for (let i = 0; i < option[`${typ}_list`].length; i++) {
             let df_name;
             let param_type;
             let on_data;
             let push_data;
-            if (typeof profile[`${typ}_list`][i] === 'function') {
-                df_name = profile[`${typ}_list`][i].name;
+            if (typeof option[`${typ}_list`][i] === 'function') {
+                df_name = option[`${typ}_list`][i].name;
                 param_type = null;
-                on_data = push_data = profile[`${typ}_list`][i];
-                profile[`${typ}_list`][i] = profile[`${typ}_list`][i].name;
+                on_data = push_data = option[`${typ}_list`][i];
+                option[`${typ}_list`][i] = option[`${typ}_list`][i].name;
             }
-            else if (typeof profile[`${typ}_list`][i] === 'object' && profile[`${typ}_list`][i].length == 2) {
-                df_name = profile[`${typ}_list`][i][0].name;
-                param_type = profile[`${typ}_list`][i][1];
-                on_data = push_data = profile[`${typ}_list`][i][0];
-                profile[`${typ}_list`][i][0] = profile[`${typ}_list`][i][0].name;
+            else if (typeof option[`${typ}_list`][i] === 'object' && option[`${typ}_list`][i].length == 2) {
+                df_name = option[`${typ}_list`][i][0].name;
+                param_type = option[`${typ}_list`][i][1];
+                on_data = push_data = option[`${typ}_list`][i][0];
+                option[`${typ}_list`][i][0] = option[`${typ}_list`][i][0].name;
             }
             else {
                 throw new RegistrationError(`Invalid ${typ}_list, usage: [df_name, ...] or [[df_name, type], ...]`);
