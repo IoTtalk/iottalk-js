@@ -1,5 +1,5 @@
 import DeviceFeature from './device-feature.js';
-import { push, register, deregister } from './dan2.js';
+import { push, register, deregister } from './dan.js';
 import { RegistrationError, ArgumentError } from './exceptions.js';
 
 export default class {
@@ -19,7 +19,7 @@ export default class {
         this.on_connect = profile['on_connect'];
         this.on_disconnect = profile['on_disconnect'];
 
-        this.push_interval = profile['push_interval'] || 1;
+        this.push_interval = profile['push_interval'];
         this.interval = profile['interval'] || {};
 
         this.device_features = {};
@@ -35,6 +35,9 @@ export default class {
     push_data(df_name) {
         if (this.device_features[df_name].push_data == null)
             return;
+        if (typeof this.push_interval === 'undefined') {
+            this.push_interval = 1;
+        }
         let _df_interval = this.interval[df_name] || this.push_interval;
         console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} ms]`);
         let _push_interval = setInterval(() => {
@@ -164,13 +167,13 @@ export default class {
             let param_type;
             let on_data;
             let push_data;
-            if (typeof profile[`${typ}_list`][i] == 'function') {
+            if (typeof profile[`${typ}_list`][i] === 'function') {
                 df_name = profile[`${typ}_list`][i].name;
                 param_type = null;
                 on_data = push_data = profile[`${typ}_list`][i];
                 profile[`${typ}_list`][i] = profile[`${typ}_list`][i].name;
             }
-            else if (typeof profile[`${typ}_list`][i] == 'object' && profile[`${typ}_list`][i].length == 2) {
+            else if (typeof profile[`${typ}_list`][i] === 'object' && profile[`${typ}_list`][i].length == 2) {
                 df_name = profile[`${typ}_list`][i][0].name;
                 param_type = profile[`${typ}_list`][i][1];
                 on_data = push_data = profile[`${typ}_list`][i][0];

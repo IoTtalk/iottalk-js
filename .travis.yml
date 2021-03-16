@@ -19,13 +19,13 @@ before_deploy:
   - export DISTDIR=/tmp/dist
   - git fetch origin gh-pages:gh-pages
   - git worktree add ${DISTDIR} gh-pages
-  - cp ./build-web/dan2-web.js ${DISTDIR}/dan2.js
-  - cp ./build-web/dan2-web.js ${DISTDIR}/dan2-${TRAVIS_COMMIT}.js
+  - cp ./build-web/iottalkjs-web.js ${DISTDIR}/iottalkjs.js
+  - cp ./build-web/iottalkjs-web.js ${DISTDIR}/iottalkjs-${TRAVIS_COMMIT}.js
   - echo "TRAVIS_TAG = ${TRAVIS_TAG}"
   - echo "TRAVIS_BRANCH = ${TRAVIS_BRANCH}"
   - if [ "${TRAVIS_TAG}" ]; then
       echo 'Add tags build';
-      cp ./build-web/dan2-web.js ${DISTDIR}/dan2-${TRAVIS_TAG}.js;
+      cp ./build-web/iottalkjs-web.js ${DISTDIR}/iottalkjs-${TRAVIS_TAG}.js;
     fi
 
 deploy:

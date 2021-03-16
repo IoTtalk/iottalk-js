@@ -112,7 +112,7 @@ const on_message = function (topic, message) {
         let res_message = {
             'msg_id': signal['msg_id'],
         };
-        if (typeof handling_result == 'boolean' && handling_result) {
+        if (typeof handling_result === 'boolean' && handling_result) {
             res_message['state'] = 'ok';
         } else {
             res_message['state'] = 'error';
