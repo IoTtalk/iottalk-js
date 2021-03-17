@@ -1,8 +1,9 @@
 import DeviceFeature from './device-feature.js';
-import { push, register, deregister } from './dan.js';
+import { Client } from './dan.js';
 import { RegistrationError, ArgumentError } from './exceptions.js';
 
 export default class {
+
     constructor(option) {
         this.api_url = option['api_url'];
         this.device_model = option['device_model'];
@@ -19,7 +20,7 @@ export default class {
         this.on_connect = option['on_connect'];
         this.on_disconnect = option['on_disconnect'];
 
-        this.push_interval = typeof option['push_interval'] != 'undefined' ? option['push_interval'] : 1;
+        this.push_interval = option['push_interval'] != undefined ? option['push_interval'] : 1;
         this.interval = option['interval'] || {};
 
         this.device_features = {};
@@ -35,7 +36,7 @@ export default class {
     push_data(df_name) {
         if (this.device_features[df_name].push_data == null)
             return;
-        let _df_interval = typeof this.interval[df_name] != 'undefined' ? this.interval[df_name] : this.push_interval;
+        let _df_interval = this.interval[df_name] != undefined ? this.interval[df_name] : this.push_interval;
         console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} s]`);
         let _push_interval = setInterval(() => {
             let _data = this.device_features[df_name].push_data();
@@ -43,9 +44,11 @@ export default class {
                 clearInterval(_push_interval);
                 return;
             }
-            if (typeof _data != 'undefined') {
-                push(df_name, _data);
+            if (_data === undefined) {
+                return;
             }
+            this.dan.push(df_name, _data);
+
         }, _df_interval * 1000);
     }
 
@@ -84,6 +87,13 @@ export default class {
         return true;
     }
 
+    df_func_name(df_name) {
+        if (df_name.match(/-[A-Z]?(I|O)[0-9]?$/i)) {
+            return df_name.replace('-', '_');
+        }
+        return df_name;
+    }
+
     _check_parameter() {
         if (!this.api_url)
             throw new RegistrationError('api_url is required.');
@@ -101,6 +111,8 @@ export default class {
 
     run() {
         this._check_parameter();
+
+        this.dan = new Client();
 
         let idf_list = [];
         let odf_list = [];
@@ -143,7 +155,7 @@ export default class {
 
         console.log('dai', msg);
 
-        register(this.api_url, msg, (result) => {
+        this.dan.register(this.api_url, msg, (result) => {
             console.log('register', result);
             document.title = this.device_name;
         });
@@ -151,7 +163,7 @@ export default class {
         window.onbeforeunload = function () {
             try {
                 if (!this.persistent_binding) {
-                    deregister();
+                    this.dan.deregister();
                 }
             } catch (error) {
                 console.error(`dai process cleanup exception: ${error}`);
@@ -165,21 +177,23 @@ export default class {
             let param_type;
             let on_data;
             let push_data;
-            if (typeof option[`${typ}_list`][i] === 'function') {
-                df_name = option[`${typ}_list`][i].name;
+            if (typeof option[`${typ}_list`][i] === 'string') {
+                df_name = option[`${typ}_list`][i];
                 param_type = null;
-                on_data = push_data = option[`${typ}_list`][i];
-                option[`${typ}_list`][i] = option[`${typ}_list`][i].name;
             }
             else if (typeof option[`${typ}_list`][i] === 'object' && option[`${typ}_list`][i].length == 2) {
-                df_name = option[`${typ}_list`][i][0].name;
+                df_name = option[`${typ}_list`][i][0];
                 param_type = option[`${typ}_list`][i][1];
-                on_data = push_data = option[`${typ}_list`][i][0];
-                option[`${typ}_list`][i][0] = option[`${typ}_list`][i][0].name;
             }
             else {
                 throw new RegistrationError(`Invalid ${typ}_list, usage: [df_name, ...] or [[df_name, type], ...]`);
             }
+
+            option['df_function_list'].forEach(df_function => {
+                if (this.df_func_name(df_name) == df_function.name) {
+                    on_data = push_data = df_function;
+                }
+            });
 
             let df = new DeviceFeature({
                 'df_name': df_name,

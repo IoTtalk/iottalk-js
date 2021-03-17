@@ -15,8 +15,9 @@ $(function () {
         'device_addr': 'c96ca71c-9e48-2a23-2868-acb420a2f105',
         'device_name': 'Dummy',
         'persistent_binding': true,
-        'idf_list': [Dummy_Sensor],
-        'odf_list': [Dummy_Control],
+        'idf_list': [['Dummy_Sensor', ['int']]],
+        'odf_list': ['Dummy_Control'],
+        'df_function_list': [Dummy_Sensor, Dummy_Control],
         'push_interval': 0,
         'interval': {
             'Dummy_Sensor': 1.5,
