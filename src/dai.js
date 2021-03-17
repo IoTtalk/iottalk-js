@@ -35,15 +35,15 @@ export default class {
     push_data(df_name) {
         if (this.device_features[df_name].push_data == null)
             return;
-        let _df_interval = this.interval[df_name] || this.push_interval;
+        let _df_interval = typeof this.interval[df_name] != 'undefined' ? this.interval[df_name] : this.push_interval;
         console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} s]`);
         let _push_interval = setInterval(() => {
             let _data = this.device_features[df_name].push_data();
-            console.log(_data);
-            if (!this.flags[df_name] && typeof _data != 'undefined') {
+            if (!this.flags[df_name]) {
                 clearInterval(_push_interval);
+                return;
             }
-            else {
+            if (typeof _data != 'undefined') {
                 push(df_name, _data);
             }
         }, _df_interval * 1000);
@@ -53,10 +53,11 @@ export default class {
         console.log(`Receive signal: ${signal}, ${df_list}`);
         if ('CONNECT' == signal) {
             df_list.forEach(df_name => {
-                if (!this.flags[df_name]) {
-                    this.flags[df_name] = true;
-                    this.push_data(df_name);
+                if (this.flags[df_name]) {
+                    return;
                 }
+                this.flags[df_name] = true;
+                this.push_data(df_name);
             });
         }
         else if ('DISCONNECT' == signal) {

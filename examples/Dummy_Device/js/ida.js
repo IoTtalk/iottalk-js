@@ -17,8 +17,9 @@ $(function () {
         'persistent_binding': true,
         'idf_list': [Dummy_Sensor],
         'odf_list': [Dummy_Control],
+        'push_interval': 0,
         'interval': {
-            'Dummy_Sensor': 100,
+            'Dummy_Sensor': 1.5,
         }
     };
 
