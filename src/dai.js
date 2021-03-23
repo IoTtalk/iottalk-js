@@ -153,12 +153,7 @@ export default class {
             }
         };
 
-        console.log('dai', msg);
-
-        this.dan.register(this.api_url, msg, (result) => {
-            console.log('register', result);
-            document.title = this.device_name;
-        });
+        this.dan.register(this.api_url, msg);
 
         window.onbeforeunload = function () {
             try {

@@ -10,6 +10,8 @@ export class Client {
         this.ctx = new Context();
         this._first_publish = false;
         this._is_reconnect = false;
+        this.on_connect = this.on_connect.bind(this);
+        this.on_disconnect = this.on_disconnect.bind(this);
     }
 
     publish(channel, message, retained, qos) {
@@ -47,10 +49,13 @@ export class Client {
     }
 
     on_connect() {
+        console.info('mqtt_connect');
+
         if (!this._is_reconnect) {
             console.log(`Successfully connect to ${this.ctx.url}`);
             console.log(`Device ID: ${this.ctx.app_id}`);
             console.log(`Device name: ${this.ctx.name}.`);
+            document.title = this.ctx.name;
             this.subscribe(this.ctx.o_chans['ctrl'], (err, granted) => {
                 if (err) {
                     throw 'Subscribe to control channel failed';
@@ -87,17 +92,17 @@ export class Client {
 
     on_message(topic, message) {
         if (topic == this.ctx.o_chans['ctrl']) {
-            let signal = JSON.parse(message);
+            const signal = JSON.parse(message);
             let handling_result = null;
             switch (signal['command']) {
                 case 'CONNECT':
                     if ('idf' in signal) {
-                        let idf = signal['idf'];
+                        const idf = signal['idf'];
                         this.ctx.i_chans.add(idf, signal['topic']);
                         handling_result = this.ctx.on_signal(signal['command'], [idf]);
 
                     } else if ('odf' in signal) {
-                        let odf = signal['odf'];
+                        const odf = signal['odf'];
                         this.ctx.o_chans.add(odf, signal['topic']);
                         handling_result = this.ctx.on_signal(signal['command'], [odf]);
                         this.subscribe(this.ctx.o_chans.topic(odf));
@@ -105,12 +110,12 @@ export class Client {
                     break;
                 case 'DISCONNECT':
                     if ('idf' in signal) {
-                        let idf = signal['idf'];
+                        const idf = signal['idf'];
                         this.ctx.i_chans.remove_df(idf);
                         handling_result = this.ctx.on_signal(signal['command'], [idf]);
 
                     } else if ('odf' in signal) {
-                        let odf = signal['odf'];
+                        const odf = signal['odf'];
                         this.unsubscribe(this.ctx.o_chans.topic(odf));
                         this.ctx.o_chans.remove_df(odf);
                         handling_result = this.ctx.on_signal(signal['command'], [odf]);
@@ -137,13 +142,14 @@ export class Client {
     }
 
     on_disconnect() {
-        console.info(`${this.ctx.name} (${this.ctx.app_id}) disconnected from  ${this.ctx.url}.`);
+        console.info('mqtt_disconnect');
+        console.info(`${this.ctx.name} (${this.ctx.app_id}) disconnected from ${this.ctx.url}.`);
         if (this.ctx.on_disconnect) {
             this.ctx.on_disconnect();
         }
     }
 
-    register(url, params, callback) {
+    register(url, params) {
         if (this.ctx.mqtt_client) {
             throw new RegistrationError('Already registered');
         }
@@ -163,7 +169,7 @@ export class Client {
             'profile': params['profile'],
         };
 
-        let _reg_msg = 'register_callback is deprecated, please use `on_register` instead.';
+        const _reg_msg = 'register_callback is deprecated, please use `on_register` instead.';
         if (params['on_register'] != undefined && params['register_callback'] != undefined) {
             throw new RegistrationError(_reg_msg);
         }
@@ -229,23 +235,11 @@ export class Client {
                     keepalive: 30,  // seems 60 is problematic for default mosquitto setup
                 });
 
-                this.ctx.mqtt_client.on('connect', (connack) => {
-                    console.info('mqtt_connect');
-                    this.on_connect();
-                    if (callback) {
-                        callback({
-                            'metadata': metadata,
-                            'dan': this
-                        });
-                    }
-                });
+                this.ctx.mqtt_client.on('connect', this.on_connect);
                 this.ctx.mqtt_client.on('reconnect', () => {
                     console.info('mqtt_reconnect');
                 });
-                this.ctx.mqtt_client.on('disconnect', (packet) => {
-                    console.info('mqtt_disconnect');
-                    this.on_disconnect();
-                });
+                this.ctx.mqtt_client.on('disconnect', this.on_disconnect);
                 this.ctx.mqtt_client.on('error', (error) => {
                     console.error('mqtt_error', error);
                 });
@@ -265,17 +259,14 @@ export class Client {
                 if (this.ctx.on_register) {
                     this.ctx.on_register();
                 }
-            }, err => {
+            })
+            .catch(err => {
                 console.error('on_failure', err);
-                if (callback)
-                    callback(false, err);
             });
     }
 
-    deregister(callback) {
+    deregister() {
         if (!this.ctx.mqtt_client) {
-            if (callback)
-                callback(false);
             throw new RegistrationError('Not registered');
         }
 
@@ -295,12 +286,8 @@ export class Client {
                 if (this.ctx.on_deregister) {
                     this.ctx.on_deregister();
                 }
-                if (callback)
-                    return callback(true);
             }, err => {
                 console.error('deregister fail', err);
-                if (callback)
-                    return callback(false);
             });
     }
 
@@ -324,12 +311,12 @@ export class Client {
 
 let _default_client = new Client();
 
-export function register(url, params, callback) {
-    return _default_client.register(url, params, callback);
+export function register(url, params) {
+    return _default_client.register(url, params);
 }
 
-export function deregister(callback) {
-    return _default_client.deregister(callback);
+export function deregister() {
+    return _default_client.deregister();
 }
 
 export function push(idf_name, data, qos) {
