@@ -124,25 +124,26 @@ export default class {
                 odf_list.push([df_name, df.df_type]);
         }
 
-        this.dan.register(
-            this.api_url,
-            this.on_signal,
-            this.on_data,
-            this.device_addr,
-            this.device_name,
-            idf_list,
-            odf_list,
-            ['mqtt'],
-            {
+        let msg = {
+            'url': this.api_url,
+            'on_signal': this.on_signal,
+            'on_data': this.on_data,
+            'accept_protos': ['mqtt'],
+            'id': this.device_addr,
+            'idf_list': idf_list,
+            'odf_list': odf_list,
+            'name': this.device_name,
+            'profile': {
                 'model': this.device_model,
                 'u_name': this.username,
                 'extra_setup_webpage': this.extra_setup_webpage,
                 'device_webpage': this.device_webpage,
             },
-            this.on_register,
-            this.on_deregister,
-            this.on_connect,
-            () => {
+            'register_callback': this.register_callback,
+            'on_register': this.on_register,
+            'on_deregister': this.on_deregister,
+            'on_connect': this.on_connect,
+            'on_disconnect': () => {
                 for (const key in this.flags) {
                     this.flags[key] = false;
                 }
@@ -150,7 +151,10 @@ export default class {
                 if (on_disconnect) {
                     return on_disconnect;
                 }
-            });
+            }
+        };
+
+        this.dan.register(msg);
 
         window.onbeforeunload = function () {
             try {

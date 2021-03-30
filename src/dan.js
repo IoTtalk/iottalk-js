@@ -149,32 +149,31 @@ export class Client {
         }
     }
 
-    register(url, on_signal, on_data, id, name,
-        idf_list, odf_list, accept_protos, profile,
-        on_register, on_deregister, on_connect, on_disconnect) {
+    register(params) {
         if (this.ctx.mqtt_client) {
             throw new RegistrationError('Already registered');
         }
 
-        this.ctx.url = url;
+        this.ctx.url = params['url'];
         if (!this.ctx.url || this.ctx.url == '') {
             throw new RegistrationError(`Invalid url: ${this.ctx.url}`);
         }
 
-        this.ctx.app_id = id || _UUID();
+        this.ctx.app_id = params['id'] || _UUID();
+
         let body = {
-            'name': name,
-            'idf_list': idf_list,
-            'odf_list': odf_list,
-            'accept_protos': accept_protos || 'mqtt',
-            'profile': profile,
+            'name': params['name'],
+            'idf_list': params['idf_list'],
+            'odf_list': params['odf_list'],
+            'accept_protos': params['accept_protos'] || 'mqtt',
+            'profile': params['profile'],
         };
 
         // other callbacks
-        this.ctx.on_register = on_register;
-        this.ctx.on_deregister = on_deregister;
-        this.ctx.on_connect = on_connect;
-        this.ctx.on_disconnect = on_disconnect;
+        this.ctx.on_register = params['on_register'];
+        this.ctx.on_deregister = params['on_deregister'];
+        this.ctx.on_connect = params['on_connect'];
+        this.ctx.on_disconnect = params['on_disconnect'];
 
 
         // filter out the empty `df_list`, in case of empty list, server reponsed 403.
@@ -237,8 +236,8 @@ export class Client {
                     this.on_message(topic, message.toString()); // Convert message from Uint8Array to String
                 });
 
-                this.ctx.on_signal = on_signal;
-                this.ctx.on_data = on_data;
+                this.ctx.on_signal = params['on_signal'];
+                this.ctx.on_data = params['on_data'];
 
                 setTimeout(() => {
                     if (!this._first_publish) {
