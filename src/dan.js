@@ -55,7 +55,9 @@ export class Client {
             console.log(`Successfully connect to ${this.ctx.url}`);
             console.log(`Device ID: ${this.ctx.app_id}`);
             console.log(`Device name: ${this.ctx.name}.`);
-            document.title = this.ctx.name;
+            if (typeof (document) !== "undefined") {
+                document.title = this.ctx.name;
+            }
             this.subscribe(this.ctx.o_chans['ctrl'], (err, granted) => {
                 if (err) {
                     throw 'Subscribe to control channel failed';
