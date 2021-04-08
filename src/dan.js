@@ -25,20 +25,33 @@ export class Client {
         if (qos === undefined)
             qos = 2;
 
-        this.ctx.mqtt_client.publish(channel, message, {
-            retain: retained,
-            qos: qos,
-        });
+        this.ctx.mqtt_client.publish(
+            channel,
+            JSON.stringify(message),
+            {
+                retain: retained,
+                qos: qos,
+            }
+        );
     }
 
-    subscribe(channel, callback, qos) {
+    subscribe(channel, qos) {
         if (!this.ctx.mqtt_client)
             return;
 
         if (qos === undefined)
             qos = 2;
 
-        return this.ctx.mqtt_client.subscribe(channel, { qos: qos }, callback);
+        return new Promise(
+            (resolve, reject) => {
+                this.ctx.mqtt_client.subscribe(channel, { qos: qos }, (err, granted) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve();
+                });
+            }
+        );
     }
 
     unsubscribe(channel) {
@@ -58,32 +71,42 @@ export class Client {
             if (typeof (document) !== "undefined") {
                 document.title = this.ctx.name;
             }
-            this.subscribe(this.ctx.o_chans['ctrl'], (err, granted) => {
-                if (err) {
-                    throw 'Subscribe to control channel failed';
-                }
-            });
+            this.subscribe(this.ctx.o_chans['ctrl'])
+                .then(() => {
+                    this.ctx.i_chans.remove_all_df();
+                    this.ctx.o_chans.remove_all_df();
+
+                    this.ctx.mqtt_client.publish(
+                        this.ctx.i_chans['ctrl'],
+                        JSON.stringify({ 'state': 'online', 'rev': this.ctx.rev }),
+                        { retain: true, qos: 2, },
+                        (err) => {
+                            if (!err) {
+                                this._first_publish = true;
+                            }
+                        });
+                })
+                .catch(err => {
+                    console.error('Subscribe to control channel failed');
+                });
         }
         else {
             console.info(`Reconnect: ${this.ctx.name}.`);
             this.publish(
                 this.ctx.i_chans['ctrl'],
-                JSON.stringify({ 'state': 'offline', 'rev': this.ctx.rev }),
+                { 'state': 'offline', 'rev': this.ctx.rev },
                 true // retained message
             );
-        }
-        this.ctx.i_chans.remove_all_df();
-        this.ctx.o_chans.remove_all_df();
 
-        this.ctx.mqtt_client.publish(
-            this.ctx.i_chans['ctrl'],
-            JSON.stringify({ 'state': 'online', 'rev': this.ctx.rev }),
-            { retain: true, qos: 2, },
-            (err) => {
-                if (!err) {
-                    this._first_publish = true;
-                }
-            });
+            this.ctx.i_chans.remove_all_df();
+            this.ctx.o_chans.remove_all_df();
+
+            this.ctx.mqtt_client.publish(
+                this.ctx.i_chans['ctrl'],
+                JSON.stringify({ 'state': 'online', 'rev': this.ctx.rev }),
+                { retain: true, qos: 2, },
+            );
+        }
 
         this._is_reconnect = true;
 
@@ -124,7 +147,7 @@ export class Client {
                     }
                     break;
             }
-            let res_message = {
+            const res_message = {
                 'msg_id': signal['msg_id'],
             };
             if (typeof handling_result === 'boolean' && handling_result) {
@@ -133,7 +156,7 @@ export class Client {
                 res_message['state'] = 'error';
                 res_message['reason'] = handling_result[1];
             }
-            this.publish(this.ctx.i_chans['ctrl'], JSON.stringify(res_message));
+            this.publish(this.ctx.i_chans['ctrl'], res_message);
         }
         else {
             let odf = this.ctx.o_chans.df(topic);
@@ -163,7 +186,7 @@ export class Client {
 
         this.ctx.app_id = params['id'] || _UUID();
 
-        let body = {
+        const body = {
             'name': params['name'],
             'idf_list': params['idf_list'],
             'odf_list': params['odf_list'],
@@ -255,7 +278,7 @@ export class Client {
 
         this.publish(
             this.ctx.i_chans['ctrl'],
-            JSON.stringify({ 'state': 'offline', 'rev': this.ctx.rev }),
+            { 'state': 'offline', 'rev': this.ctx.rev },
             true
         );
         this.ctx.mqtt_client.end();
@@ -288,7 +311,7 @@ export class Client {
             data = [data];
         }
 
-        this.publish(this.ctx.i_chans.topic(idf_name), JSON.stringify(data), false, qos);
+        this.publish(this.ctx.i_chans.topic(idf_name), data, false, qos);
     }
 }
 

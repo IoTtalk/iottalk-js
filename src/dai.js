@@ -124,7 +124,7 @@ export default class {
                 odf_list.push([df_name, df.df_type]);
         }
 
-        let msg = {
+        const msg = {
             'url': this.api_url,
             'on_signal': this.on_signal,
             'on_data': this.on_data,
