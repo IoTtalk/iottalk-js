@@ -186,18 +186,10 @@ export class Client {
             }
         );
 
-        new Promise(
-            (resolve, reject) => {
-                superagent.put(`${this.ctx.url}/${this.ctx.app_id}`)
-                    .type('json')
-                    .accept('json')
-                    .send(body)
-                    .then(res => {
-                        resolve(res);
-                    }, err => {
-                        reject(err);
-                    });
-            })
+        superagent.put(`${this.ctx.url}/${this.ctx.app_id}`)
+            .type('json')
+            .accept('json')
+            .send(body)
             .then(res => {
                 let metadata = res.body;
                 if (typeof metadata === 'string') {

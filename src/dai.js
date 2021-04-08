@@ -156,6 +156,7 @@ export default class {
 
         this.dan.register(msg);
 
+        // FIXME: window is not defined in node.js
         window.onbeforeunload = function () {
             try {
                 if (!this.persistent_binding) {
