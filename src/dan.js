@@ -15,9 +15,8 @@ export class Client {
     }
 
     publish(channel, message, retained, qos) {
-        if (!this.ctx.mqtt_client) {
+        if (!this.ctx.mqtt_client)
             throw 'unable to publish without ctx.mqtt_client';
-        }
 
         if (retained === undefined)
             retained = false;
@@ -25,14 +24,18 @@ export class Client {
         if (qos === undefined)
             qos = 2;
 
-        this.ctx.mqtt_client.publish(
-            channel,
-            JSON.stringify(message),
-            {
-                retain: retained,
-                qos: qos,
-            }
-        );
+        return new Promise((resolve, reject) => {
+            this.ctx.mqtt_client.publish(channel,
+                JSON.stringify(message),
+                { retain: retained, qos: qos, },
+                (err) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve();
+                }
+            )
+        });
     }
 
     subscribe(channel, qos) {
@@ -42,27 +45,37 @@ export class Client {
         if (qos === undefined)
             qos = 2;
 
-        return new Promise(
-            (resolve, reject) => {
-                this.ctx.mqtt_client.subscribe(channel, { qos: qos }, (err, granted) => {
+        return new Promise((resolve, reject) => {
+            this.ctx.mqtt_client.subscribe(channel,
+                { qos: qos },
+                (err, granted) => {
                     if (err) {
                         reject(err);
                     }
                     resolve();
                 });
-            }
-        );
+        });
     }
 
     unsubscribe(channel) {
         if (!this.ctx.mqtt_client)
             return;
 
-        return this.ctx.mqtt_client.unsubscribe(channel);
+        return new Promise((resolve, reject) => {
+            this.ctx.mqtt_client.unsubscribe(channel,
+                (err) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve();
+                });
+        });
     }
 
     on_connect() {
         console.info('mqtt_connect');
+
+        let promise_thing;
 
         if (!this._is_reconnect) {
             console.log(`Successfully connect to ${this.ctx.url}`);
@@ -71,48 +84,40 @@ export class Client {
             if (typeof (document) !== "undefined") {
                 document.title = this.ctx.name;
             }
-            this.subscribe(this.ctx.o_chans['ctrl'])
-                .then(() => {
-                    this.ctx.i_chans.remove_all_df();
-                    this.ctx.o_chans.remove_all_df();
-
-                    this.ctx.mqtt_client.publish(
-                        this.ctx.i_chans['ctrl'],
-                        JSON.stringify({ 'state': 'online', 'rev': this.ctx.rev }),
-                        { retain: true, qos: 2, },
-                        (err) => {
-                            if (!err) {
-                                this._first_publish = true;
-                            }
-                        });
-                })
+            promise_thing = this.subscribe(this.ctx.o_chans['ctrl'])
                 .catch(err => {
-                    console.error('Subscribe to control channel failed');
+                    throw 'Subscribe to control channel failed';
                 });
         }
         else {
             console.info(`Reconnect: ${this.ctx.name}.`);
-            this.publish(
+            promise_thing = this.publish(
                 this.ctx.i_chans['ctrl'],
                 { 'state': 'offline', 'rev': this.ctx.rev },
                 true // retained message
             );
+        }
 
+        promise_thing.then(() => {
             this.ctx.i_chans.remove_all_df();
             this.ctx.o_chans.remove_all_df();
 
-            this.ctx.mqtt_client.publish(
+            this.publish(
                 this.ctx.i_chans['ctrl'],
-                JSON.stringify({ 'state': 'online', 'rev': this.ctx.rev }),
-                { retain: true, qos: 2, },
-            );
-        }
+                { 'state': 'online', 'rev': this.ctx.rev },
+                true // retained message
+            ).then(() => {
+                this._first_publish = true;
+            });
 
-        this._is_reconnect = true;
+            this._is_reconnect = true;
 
-        if (this.ctx.on_connect) {
-            this.ctx.on_connect();
-        }
+            if (this.ctx.on_connect) {
+                this.ctx.on_connect();
+            }
+        }).catch(err => {
+            console.error(err);
+        });
     }
 
     on_message(topic, message) {
@@ -199,7 +204,6 @@ export class Client {
         this.ctx.on_deregister = params['on_deregister'];
         this.ctx.on_connect = params['on_connect'];
         this.ctx.on_disconnect = params['on_disconnect'];
-
 
         // filter out the empty `df_list`, in case of empty list, server reponsed 403.
         ['idf_list', 'odf_list'].forEach(
