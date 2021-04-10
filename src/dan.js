@@ -30,9 +30,9 @@ export class Client {
                 { retain: retained, qos: qos, },
                 (err) => {
                     if (err) {
-                        reject(err);
+                        return reject(err);
                     }
-                    resolve();
+                    return resolve();
                 }
             )
         });
@@ -50,9 +50,9 @@ export class Client {
                 { qos: qos },
                 (err, granted) => {
                     if (err) {
-                        reject(err);
+                        return reject(err);
                     }
-                    resolve();
+                    return resolve();
                 });
         });
     }
@@ -65,9 +65,9 @@ export class Client {
             this.ctx.mqtt_client.unsubscribe(channel,
                 (err) => {
                     if (err) {
-                        reject(err);
+                        return reject(err);
                     }
-                    resolve();
+                    return resolve();
                 });
         });
     }
@@ -78,13 +78,15 @@ export class Client {
         let promise_thing;
 
         if (!this._is_reconnect) {
-            console.log(`Successfully connect to ${this.ctx.url}`);
-            console.log(`Device ID: ${this.ctx.app_id}`);
-            console.log(`Device name: ${this.ctx.name}.`);
-            if (typeof (document) !== "undefined") {
-                document.title = this.ctx.name;
-            }
             promise_thing = this.subscribe(this.ctx.o_chans['ctrl'])
+                .then(() => {
+                    console.log(`Successfully connect to ${this.ctx.url}`);
+                    console.log(`Device ID: ${this.ctx.app_id}`);
+                    console.log(`Device name: ${this.ctx.name}.`);
+                    if (typeof (document) !== "undefined") {
+                        document.title = this.ctx.name;
+                    }
+                })
                 .catch(err => {
                     throw 'Subscribe to control channel failed';
                 });
