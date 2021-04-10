@@ -34,12 +34,12 @@ export default class {
     }
 
     push_data(df_name) {
-        if (this.device_features[df_name].push_data == null)
+        if (this.device_features[this.df_func_name(df_name)].push_data == null)
             return;
         let _df_interval = this.interval[df_name] != undefined ? this.interval[df_name] : this.push_interval;
         console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} s]`);
         let _push_interval = setInterval(() => {
-            let _data = this.device_features[df_name].push_data();
+            let _data = this.device_features[this.df_func_name(df_name)].push_data();
             if (!this.flags[df_name]) {
                 clearInterval(_push_interval);
                 return;
@@ -79,7 +79,7 @@ export default class {
 
     on_data(df_name, data) {
         try {
-            this.device_features[df_name].on_data(data);
+            this.device_features[this.df_func_name(df_name)].on_data(data);
         } catch (err) {
             console.error(err);
             return false;
@@ -174,23 +174,19 @@ export default class {
             let param_type;
             let on_data;
             let push_data;
-            if (typeof option[`${typ}_list`][i] === 'string') {
-                df_name = option[`${typ}_list`][i];
+            if (typeof option[`${typ}_list`][i] === 'function') {
+                df_name = option[`${typ}_list`][i].name;
                 param_type = null;
+                on_data = push_data = option[`${typ}_list`][i];
             }
             else if (typeof option[`${typ}_list`][i] === 'object' && option[`${typ}_list`][i].length == 2) {
-                df_name = option[`${typ}_list`][i][0];
+                df_name = option[`${typ}_list`][i][0].name;
                 param_type = option[`${typ}_list`][i][1];
+                on_data = push_data = option[`${typ}_list`][i][0];
             }
             else {
                 throw new RegistrationError(`Invalid ${typ}_list, usage: [df_name, ...] or [[df_name, type], ...]`);
             }
-
-            option['df_function_list'].forEach(df_function => {
-                if (this.df_func_name(df_name) == df_function.name) {
-                    on_data = push_data = df_function;
-                }
-            });
 
             let df = new DeviceFeature({
                 'df_name': df_name,
