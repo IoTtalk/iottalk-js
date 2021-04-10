@@ -32,7 +32,7 @@ export class Client {
                     if (err) {
                         return reject(err);
                     }
-                    return resolve();
+                    resolve();
                 }
             )
         });
@@ -52,7 +52,7 @@ export class Client {
                     if (err) {
                         return reject(err);
                     }
-                    return resolve();
+                    resolve();
                 });
         });
     }
@@ -67,7 +67,7 @@ export class Client {
                     if (err) {
                         return reject(err);
                     }
-                    return resolve();
+                    resolve();
                 });
         });
     }
@@ -174,7 +174,6 @@ export class Client {
     }
 
     on_disconnect() {
-        console.info('mqtt_disconnect');
         console.info(`${this.ctx.name} (${this.ctx.app_id}) disconnected from ${this.ctx.url}.`);
         if (this.ctx.on_disconnect) {
             this.ctx.on_disconnect();
@@ -331,6 +330,6 @@ export function deregister() {
     return _default_client.deregister();
 }
 
-export function push(idf_name, data, qos) {
-    return _default_client.push(idf_name, data, qos);
+export function push(...args) {
+    return _default_client.push(...args);
 }
