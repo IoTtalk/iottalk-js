@@ -19,7 +19,7 @@ $(function () {
         'odf_list': [Dummy_Control],
         'push_interval': 0,
         'interval': {
-            'Dummy-Sensor': 1.5,
+            'Dummy_Sensor': 1.5,
         }
     };
 
