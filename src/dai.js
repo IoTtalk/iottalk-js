@@ -6,7 +6,7 @@ export default class {
   constructor(option) {
     this.apiUrl = option.apiUrl;
     this.deviceModel = option.deviceModel;
-    this.device_addr = option.device_addr;
+    this.deviceAddr = option.deviceAddr;
     this.device_name = option.device_name;
     this.persistent_binding = option.persistent_binding || false;
     this.username = option.username;
@@ -92,9 +92,9 @@ export default class {
 
     if (!this.deviceModel) throw new RegistrationError('deviceModel not given.');
 
-    if (this.persistent_binding && !this.device_addr) {
+    if (this.persistent_binding && !this.deviceAddr) {
       throw new ArgumentError('In case of `persistent_binding` set to `True`, '
-                + 'the `device_addr` should be set and fixed.');
+                + 'the `deviceAddr` should be set and fixed.');
     }
 
     if (Object.keys(this.device_features).length === 0) throw new RegistrationError('Neither idfList nor odfList is empty.');
@@ -121,7 +121,7 @@ export default class {
       onSignal: this.onSignal,
       onData: this.onData,
       accept_protos: ['mqtt'],
-      id: this.device_addr,
+      id: this.deviceAddr,
       idfList,
       odfList,
       name: this.device_name,
