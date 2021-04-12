@@ -12,7 +12,7 @@ export default class {
       throw new ArgumentError(`${this.DFName} df_type must be "idf" or "odf"`);
     }
 
-    this.param_type = params.param_type || [null];
+    this.paramType = params.paramType || [null];
 
     this.onData = null;
     if (params.df_type === 'odf' && params.onData) this.onData = params.onData;

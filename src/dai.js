@@ -159,33 +159,35 @@ export default class {
   }
 
   parseDFProfile(option, typ) {
-    const df_list = `${typ}_list`;
-    for (let i = 0; i < option[df_list].length; i++) {
+    const DFList = `${typ}_list`;
+    option[DFList].forEach((x) => {
       let DFName;
-      let param_type;
+      let paramType;
       let onData;
       let pushData;
-      if (!Array.isArray(option[df_list][i])) {
-        DFName = this.constructor.DFNameFromFunc(option[df_list][i].name);
-        param_type = null;
-        onData = pushData = option[df_list][i];
-      } else if (Array.isArray(option[df_list][i]) && option[df_list][i].length == 2) {
-        DFName = this.constructor.DFNameFromFunc(option[df_list][i][0].name);
-        param_type = option[df_list][i][1];
-        onData = pushData = option[df_list][i][0];
+
+      if (!Array.isArray(x)) {
+        DFName = this.constructor.DFNameFromFunc(x.name);
+        paramType = null;
+        onData = x;
+        pushData = x;
+      } else if (Array.isArray(x) && x.length === 2) {
+        DFName = this.constructor.DFNameFromFunc(x[0].name);
+        [onData, paramType] = x;
+        [pushData] = x;
       } else {
-        throw new RegistrationError(`Invalid ${df_list}, usage: [df_func, ...] or [[df_func, type], ...]`);
+        throw new RegistrationError(`Invalid ${DFList}, usage: [df_func, ...] or [[df_func, type], ...]`);
       }
 
       const df = new DeviceFeature({
         DFName,
         df_type: typ,
-        param_type,
+        paramType,
         pushData,
         onData,
       });
 
       this.device_features[DFName] = df;
-    }
+    });
   }
 }
