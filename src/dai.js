@@ -169,23 +169,24 @@ export default class {
     }
 
     parse_df_profile(option, typ) {
-        for (let i = 0; i < option[`${typ}_list`].length; i++) {
+        const df_list = `${typ}_list`;
+        for (let i = 0; i < option[df_list].length; i++) {
             let df_name;
             let param_type;
             let on_data;
             let push_data;
-            if (typeof option[`${typ}_list`][i] === 'function') {
-                df_name = option[`${typ}_list`][i].name;
+            if (!Array.isArray(option[df_list][i])) {
+                df_name = option[df_list][i].name;
                 param_type = null;
-                on_data = push_data = option[`${typ}_list`][i];
+                on_data = push_data = option[df_list][i];
             }
-            else if (typeof option[`${typ}_list`][i] === 'object' && option[`${typ}_list`][i].length == 2) {
-                df_name = option[`${typ}_list`][i][0].name;
-                param_type = option[`${typ}_list`][i][1];
-                on_data = push_data = option[`${typ}_list`][i][0];
+            else if (Array.isArray(option[df_list][i]) && option[df_list][i].length == 2) {
+                df_name = option[df_list][i][0].name;
+                param_type = option[df_list][i][1];
+                on_data = push_data = option[df_list][i][0];
             }
             else {
-                throw new RegistrationError(`Invalid ${typ}_list, usage: [df_name, ...] or [[df_name, type], ...]`);
+                throw new RegistrationError(`Invalid ${df_list}, usage: [df_func, ...] or [[df_func, type], ...]`);
             }
 
             let df = new DeviceFeature({
