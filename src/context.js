@@ -13,7 +13,7 @@ export default class {
     this.i_chans = new ChannelPool();
     this.o_chans = new ChannelPool();
     this.rev = null;
-    this.on_signal = null;
+    this.onSignal = null;
     this.on_data = null;
     this.on_register = null;
     this.on_deregister = null;

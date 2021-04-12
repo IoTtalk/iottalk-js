@@ -25,7 +25,7 @@ export default class {
     this.device_features = {};
     this.flags = {};
 
-    this.on_signal = this.on_signal.bind(this);
+    this.onSignal = this.onSignal.bind(this);
     this.on_data = this.on_data.bind(this);
 
     this.parse_df_profile(option, 'idf');
@@ -49,7 +49,7 @@ export default class {
     }, interval * 1000);
   }
 
-  on_signal(signal, df_list) {
+  onSignal(signal, df_list) {
     console.log(`Receive signal: ${signal}, ${df_list}`);
     if (signal == 'CONNECT') {
       df_list.forEach((DFName) => {
@@ -114,9 +114,9 @@ export default class {
       else odf_list.push([DFName, df.df_type]);
     }
 
-    const msg = {
+    const option = {
       url: this.api_url,
-      on_signal: this.on_signal,
+      onSignal: this.onSignal,
       on_data: this.on_data,
       accept_protos: ['mqtt'],
       id: this.device_addr,
@@ -144,7 +144,7 @@ export default class {
       },
     };
 
-    this.dan.register(msg);
+    this.dan.register(option);
 
     // FIXME: window is not defined in node.js
     window.onbeforeunload = function () {

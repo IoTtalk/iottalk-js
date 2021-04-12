@@ -122,11 +122,11 @@ export class Client {
           if ('idf' in signal) {
             const { idf } = signal;
             this.ctx.i_chans.add(idf, signal.topic);
-            handling_result = this.ctx.on_signal(signal.command, [idf]);
+            handling_result = this.ctx.onSignal(signal.command, [idf]);
           } else if ('odf' in signal) {
             const { odf } = signal;
             this.ctx.o_chans.add(odf, signal.topic);
-            handling_result = this.ctx.on_signal(signal.command, [odf]);
+            handling_result = this.ctx.onSignal(signal.command, [odf]);
             this.subscribe(this.ctx.o_chans.topic(odf));
           }
           break;
@@ -134,12 +134,12 @@ export class Client {
           if ('idf' in signal) {
             const { idf } = signal;
             this.ctx.i_chans.removeDF(idf);
-            handling_result = this.ctx.on_signal(signal.command, [idf]);
+            handling_result = this.ctx.onSignal(signal.command, [idf]);
           } else if ('odf' in signal) {
             const { odf } = signal;
             this.unsubscribe(this.ctx.o_chans.topic(odf));
             this.ctx.o_chans.removeDF(odf);
-            handling_result = this.ctx.on_signal(signal.command, [odf]);
+            handling_result = this.ctx.onSignal(signal.command, [odf]);
           }
           break;
       }
@@ -244,7 +244,7 @@ export class Client {
           this.on_message(topic, message.toString()); // Convert message from Uint8Array to String
         });
 
-        this.ctx.on_signal = params.on_signal;
+        this.ctx.onSignal = params.onSignal;
         this.ctx.on_data = params.on_data;
 
         setTimeout(() => {
