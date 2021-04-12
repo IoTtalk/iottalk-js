@@ -139,8 +139,8 @@ export default class {
           this.flags[key] = false;
         }
         console.debug(`on_disconnect: _flag = ${this.flags}`);
-        if (on_disconnect) {
-          return on_disconnect;
+        if (this.on_disconnect) {
+          this.on_disconnect();
         }
       },
     };
