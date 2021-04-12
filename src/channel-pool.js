@@ -1,29 +1,29 @@
 export default class {
-  constructor(props) {
-    this._table = {};
-    this._rtable = {};
+  constructor() {
+    this.table = {};
+    this.rtable = {};
   }
 
-  add(df_name, topic_) {
-    this._table[df_name] = topic_;
-    this._rtable[topic_] = df_name;
+  add(dfName, topic) {
+    this.table[dfName] = topic;
+    this.rtable[topic] = dfName;
   }
 
-  topic(df_name) {
-    return this._table[df_name];
+  topic(dfName) {
+    return this.table[dfName];
   }
 
-  remove_df(df_name) {
-    delete this._rtable[this._table[df_name]];
-    delete this._table[df_name];
+  removeDF(dfName) {
+    delete this.rtable[this.table[dfName]];
+    delete this.table[dfName];
   }
 
-  remove_all_df() {
-    this._rtable = {};
-    this._table = {};
+  removeAllDF() {
+    this.rtable = {};
+    this.table = {};
   }
 
-  df(topic_) {
-    return this._rtable[topic_];
+  df(topic) {
+    return this.rtable[topic];
   }
 }

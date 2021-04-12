@@ -92,8 +92,8 @@ export class Client {
     }
 
     promise_thing.then(() => {
-      this.ctx.i_chans.remove_all_df();
-      this.ctx.o_chans.remove_all_df();
+      this.ctx.i_chans.removeAllDF();
+      this.ctx.o_chans.removeAllDF();
 
       this.publish(
         this.ctx.i_chans.ctrl,
@@ -133,12 +133,12 @@ export class Client {
         case 'DISCONNECT':
           if ('idf' in signal) {
             const { idf } = signal;
-            this.ctx.i_chans.remove_df(idf);
+            this.ctx.i_chans.removeDF(idf);
             handling_result = this.ctx.on_signal(signal.command, [idf]);
           } else if ('odf' in signal) {
             const { odf } = signal;
             this.unsubscribe(this.ctx.o_chans.topic(odf));
-            this.ctx.o_chans.remove_df(odf);
+            this.ctx.o_chans.removeDF(odf);
             handling_result = this.ctx.on_signal(signal.command, [odf]);
           }
           break;
