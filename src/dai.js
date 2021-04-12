@@ -107,10 +107,13 @@ export default class {
     const idfList = [];
     const odfList = [];
 
-    for (const [DFName, df] of Object.entries(this.device_features)) {
-      if (df.df_type === 'idf') idfList.push([DFName, df.df_type]);
-      else odfList.push([DFName, df.df_type]);
-    }
+    Object.entries(this.device_features).forEach(([DFName, df]) => {
+      if (df.df_type === 'idf') {
+        idfList.push([DFName, df.df_type]);
+      } else {
+        odfList.push([DFName, df.df_type]);
+      }
+    });
 
     const option = {
       url: this.apiUrl,
