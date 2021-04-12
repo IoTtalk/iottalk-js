@@ -7,8 +7,8 @@ export default class {
     this.apiUrl = option.apiUrl;
     this.deviceModel = option.deviceModel;
     this.deviceAddr = option.deviceAddr;
-    this.device_name = option.device_name;
-    this.persistent_binding = option.persistent_binding || false;
+    this.deviceName = option.deviceName;
+    this.persistentBinding = option.persistentBinding || false;
     this.username = option.username;
     this.extra_setup_webpage = option.extra_setup_webpage || '';
     this.device_webpage = option.device_webpage || '';
@@ -92,8 +92,8 @@ export default class {
 
     if (!this.deviceModel) throw new RegistrationError('deviceModel not given.');
 
-    if (this.persistent_binding && !this.deviceAddr) {
-      throw new ArgumentError('In case of `persistent_binding` set to `True`, '
+    if (this.persistentBinding && !this.deviceAddr) {
+      throw new ArgumentError('In case of `persistentBinding` set to `True`, '
                 + 'the `deviceAddr` should be set and fixed.');
     }
 
@@ -124,7 +124,7 @@ export default class {
       id: this.deviceAddr,
       idfList,
       odfList,
-      name: this.device_name,
+      name: this.deviceName,
       profile: {
         model: this.deviceModel,
         u_name: this.username,
@@ -150,7 +150,7 @@ export default class {
     // eslint-disable-next-line func-names
     window.onbeforeunload = function () {
       try {
-        if (!this.persistent_binding) {
+        if (!this.persistentBinding) {
           this.dan.deregister();
         }
       } catch (error) {
