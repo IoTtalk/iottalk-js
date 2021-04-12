@@ -4,18 +4,18 @@ export default class {
     this.rtable = {};
   }
 
-  add(dfName, topic) {
-    this.table[dfName] = topic;
-    this.rtable[topic] = dfName;
+  add(DFName, topic) {
+    this.table[DFName] = topic;
+    this.rtable[topic] = DFName;
   }
 
-  topic(dfName) {
-    return this.table[dfName];
+  topic(DFName) {
+    return this.table[DFName];
   }
 
-  removeDF(dfName) {
-    delete this.rtable[this.table[dfName]];
-    delete this.table[dfName];
+  removeDF(DFName) {
+    delete this.rtable[this.table[DFName]];
+    delete this.table[DFName];
   }
 
   removeAllDF() {

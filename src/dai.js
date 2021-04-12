@@ -1,6 +1,6 @@
-import DeviceFeature from './device-feature.js';
-import { Client } from './dan.js';
-import { RegistrationError, ArgumentError } from './exceptions.js';
+import DeviceFeature from './device-feature';
+import { Client } from './dan';
+import { RegistrationError, ArgumentError } from './exceptions';
 
 export default class {
   constructor(option) {
@@ -19,7 +19,7 @@ export default class {
     this.on_connect = option.on_connect;
     this.on_disconnect = option.on_disconnect;
 
-    this.push_interval = option.push_interval != undefined ? option.push_interval : 1;
+    this.push_interval = option.push_interval !== undefined ? option.push_interval : 1;
     this.interval = option.interval || {};
 
     this.device_features = {};
@@ -34,7 +34,7 @@ export default class {
 
   push_data(df_name) {
     if (this.device_features[df_name].push_data == null) return;
-    const _df_interval = this.interval[df_name] != undefined ? this.interval[df_name] : this.push_interval;
+    const _df_interval = this.interval[df_name] !== undefined ? this.interval[df_name] : this.push_interval;
     console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} s]`);
     const _push_interval = setInterval(() => {
       const _data = this.device_features[df_name].push_data();
