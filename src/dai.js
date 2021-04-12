@@ -108,10 +108,10 @@ export default class {
     const odfList = [];
 
     Object.entries(this.device_features).forEach(([DFName, df]) => {
-      if (df.df_type === 'idf') {
-        idfList.push([DFName, df.df_type]);
+      if (df.DFType === 'idf') {
+        idfList.push([DFName, df.DFType]);
       } else {
-        odfList.push([DFName, df.df_type]);
+        odfList.push([DFName, df.DFType]);
       }
     });
 
@@ -181,7 +181,7 @@ export default class {
 
       const df = new DeviceFeature({
         DFName,
-        df_type: typ,
+        DFType: typ,
         paramType,
         pushData,
         onData,

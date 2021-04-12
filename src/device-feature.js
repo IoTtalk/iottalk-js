@@ -7,17 +7,17 @@ export default class {
       throw new ArgumentError('device feature name is required.');
     }
 
-    this.df_type = params.df_type; // idf | odf
-    if (this.df_type !== 'idf' && this.df_type !== 'odf') {
-      throw new ArgumentError(`${this.DFName} df_type must be "idf" or "odf"`);
+    this.DFType = params.DFType; // idf | odf
+    if (this.DFType !== 'idf' && this.DFType !== 'odf') {
+      throw new ArgumentError(`${this.DFName} DFType must be "idf" or "odf"`);
     }
 
     this.paramType = params.paramType || [null];
 
     this.onData = null;
-    if (params.df_type === 'odf' && params.onData) this.onData = params.onData;
+    if (params.DFType === 'odf' && params.onData) this.onData = params.onData;
 
     this.pushData = null;
-    if (params.df_type === 'idf' && params.pushData) this.pushData = params.pushData;
+    if (params.DFType === 'idf' && params.pushData) this.pushData = params.pushData;
   }
 }
