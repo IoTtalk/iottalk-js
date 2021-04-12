@@ -28,8 +28,8 @@ export default class {
     this.onSignal = this.onSignal.bind(this);
     this.onData = this.onData.bind(this);
 
-    this.parse_df_profile(option, 'idf');
-    this.parse_df_profile(option, 'odf');
+    this.parseDFProfile(option, 'idf');
+    this.parseDFProfile(option, 'odf');
   }
 
   pushData(DFName) {
@@ -135,9 +135,7 @@ export default class {
       on_deregister: this.on_deregister,
       on_connect: this.on_connect,
       on_disconnect: () => {
-        for (const key in this.flags) {
-          this.flags[key] = false;
-        }
+        Object.keys(this.flags).forEach((i) => { this.flags[i] = false; });
         console.debug(`on_disconnect: _flag = ${this.flags}`);
         if (this.on_disconnect) {
           this.on_disconnect();
@@ -148,6 +146,7 @@ export default class {
     this.dan.register(option);
 
     // FIXME: window is not defined in node.js
+    // eslint-disable-next-line func-names
     window.onbeforeunload = function () {
       try {
         if (!this.persistent_binding) {
@@ -159,7 +158,7 @@ export default class {
     };
   }
 
-  parse_df_profile(option, typ) {
+  parseDFProfile(option, typ) {
     const df_list = `${typ}_list`;
     for (let i = 0; i < option[df_list].length; i++) {
       let DFName;
