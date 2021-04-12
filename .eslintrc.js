@@ -10,7 +10,8 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  ignorePatterns: ["**/build/*.js"],
+  ignorePatterns: ['**/build/*.js'],
   rules: {
+    'no-console': 'off',
   },
 };
