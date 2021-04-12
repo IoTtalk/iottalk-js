@@ -17,7 +17,7 @@ export default class {
     this.on_data = null;
     if (params.df_type === 'odf' && params.on_data) this.on_data = params.on_data;
 
-    this.push_data = null;
-    if (params.df_type === 'idf' && params.push_data) this.push_data = params.push_data;
+    this.pushData = null;
+    if (params.df_type === 'idf' && params.pushData) this.pushData = params.pushData;
   }
 }
