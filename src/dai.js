@@ -34,7 +34,8 @@ export default class {
 
   pushData(DFName) {
     if (this.device_features[DFName].pushData == null) return;
-    const interval = this.interval[DFName] !== undefined ? this.interval[DFName] : this.push_interval;
+    const interval = this.interval[DFName] !== undefined
+      ? this.interval[DFName] : this.push_interval;
     console.debug(`${DFName} : ${this.flags[DFName]} [message / ${interval} s]`);
     const pushInterval = setInterval(() => {
       const data = this.device_features[DFName].pushData();
