@@ -49,23 +49,21 @@ export default class {
     }, interval * 1000);
   }
 
-  onSignal(signal, df_list) {
-    console.log(`Receive signal: ${signal}, ${df_list}`);
-    if (signal == 'CONNECT') {
-      df_list.forEach((DFName) => {
+  onSignal(signal, DFList) {
+    console.log(`Receive signal: ${signal}, ${DFList}`);
+    if (signal === 'CONNECT') {
+      DFList.forEach((DFName) => {
         if (this.flags[DFName]) {
           return;
         }
         this.flags[DFName] = true;
         this.pushData(DFName);
       });
-    } else if (signal == 'DISCONNECT') {
-      df_list.forEach((DFName) => {
-        this.flags[DFName] = false;
-      });
-    } else if (signal == 'SUSPEND') {
+    } else if (signal === 'DISCONNECT') {
+      DFList.forEach((DFName) => { this.flags[DFName] = false; });
+    } else if (signal === 'SUSPEND') {
       // Not use
-    } else if (signal == 'RESUME') {
+    } else if (signal === 'RESUME') {
       // Not use
     }
     return true;
@@ -98,7 +96,7 @@ export default class {
                 + 'the `device_addr` should be set and fixed.');
     }
 
-    if (Object.keys(this.device_features).length === 0) throw new RegistrationError('Neither idf_list nor odf_list is empty.');
+    if (Object.keys(this.device_features).length === 0) throw new RegistrationError('Neither idfList nor odfList is empty.');
   }
 
   run() {
@@ -106,12 +104,12 @@ export default class {
 
     this.dan = new Client();
 
-    const idf_list = [];
-    const odf_list = [];
+    const idfList = [];
+    const odfList = [];
 
     for (const [DFName, df] of Object.entries(this.device_features)) {
-      if (df.df_type == 'idf') idf_list.push([DFName, df.df_type]);
-      else odf_list.push([DFName, df.df_type]);
+      if (df.df_type == 'idf') idfList.push([DFName, df.df_type]);
+      else odfList.push([DFName, df.df_type]);
     }
 
     const option = {
@@ -120,8 +118,8 @@ export default class {
       on_data: this.on_data,
       accept_protos: ['mqtt'],
       id: this.device_addr,
-      idf_list,
-      odf_list,
+      idfList,
+      odfList,
       name: this.device_name,
       profile: {
         model: this.device_model,

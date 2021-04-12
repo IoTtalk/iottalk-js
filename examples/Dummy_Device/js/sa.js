@@ -15,8 +15,8 @@ $(() => {
     device_addr: 'c96ca71c-9e48-2a23-2868-acb420a2f105',
     device_name: 'Dummy',
     persistent_binding: true,
-    idf_list: [[Dummy_Sensor, ['int']]],
-    odf_list: [Dummy_Control],
+    idfList: [[Dummy_Sensor, ['int']]],
+    odfList: [Dummy_Control],
     push_interval: 0,
     interval: {
       Dummy_Sensor: 1.5,

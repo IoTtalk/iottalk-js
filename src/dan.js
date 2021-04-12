@@ -181,8 +181,8 @@ export class Client {
 
     const body = {
       name: params.name,
-      idf_list: params.idf_list,
-      odf_list: params.odf_list,
+      idf_list: params.idfList,
+      odf_list: params.odfList,
       accept_protos: params.accept_protos || 'mqtt',
       profile: params.profile,
     };
