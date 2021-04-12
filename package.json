@@ -11,7 +11,8 @@
     "build": "npm run build:node && npm run build:web",
     "build:node": "npx babel src --out-dir build-node && npx ncc build build-node/index.js -o build-node/dist && mv build-node/dist/index.js build-node/dist/iottalkjs.js",
     "build:web": "npx webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "yarn run eslint src examples"
   },
   "repository": {
     "type": "git",
