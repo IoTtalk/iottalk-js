@@ -156,7 +156,7 @@ export class Client {
     } else {
       const odf = this.ctx.o_chans.df(topic);
       if (!odf) return;
-      this.ctx.on_data(odf, JSON.parse(message));
+      this.ctx.onData(odf, JSON.parse(message));
     }
   }
 
@@ -245,7 +245,7 @@ export class Client {
         });
 
         this.ctx.onSignal = params.onSignal;
-        this.ctx.on_data = params.on_data;
+        this.ctx.onData = params.onData;
 
         setTimeout(() => {
           if (!this._first_publish) {

@@ -26,7 +26,7 @@ export default class {
     this.flags = {};
 
     this.onSignal = this.onSignal.bind(this);
-    this.on_data = this.on_data.bind(this);
+    this.onData = this.onData.bind(this);
 
     this.parse_df_profile(option, 'idf');
     this.parse_df_profile(option, 'odf');
@@ -69,9 +69,9 @@ export default class {
     return true;
   }
 
-  on_data(DFName, data) {
+  onData(DFName, data) {
     try {
-      this.device_features[DFName].on_data(data);
+      this.device_features[DFName].onData(data);
     } catch (err) {
       console.error(err);
       return false;
@@ -115,7 +115,7 @@ export default class {
     const option = {
       url: this.api_url,
       onSignal: this.onSignal,
-      on_data: this.on_data,
+      onData: this.onData,
       accept_protos: ['mqtt'],
       id: this.device_addr,
       idfList,
@@ -161,16 +161,16 @@ export default class {
     for (let i = 0; i < option[df_list].length; i++) {
       let DFName;
       let param_type;
-      let on_data;
+      let onData;
       let pushData;
       if (!Array.isArray(option[df_list][i])) {
         DFName = this.DFNameFromFunc(option[df_list][i].name);
         param_type = null;
-        on_data = pushData = option[df_list][i];
+        onData = pushData = option[df_list][i];
       } else if (Array.isArray(option[df_list][i]) && option[df_list][i].length == 2) {
         DFName = this.DFNameFromFunc(option[df_list][i][0].name);
         param_type = option[df_list][i][1];
-        on_data = pushData = option[df_list][i][0];
+        onData = pushData = option[df_list][i][0];
       } else {
         throw new RegistrationError(`Invalid ${df_list}, usage: [df_func, ...] or [[df_func, type], ...]`);
       }
@@ -180,7 +180,7 @@ export default class {
         df_type: typ,
         param_type,
         pushData,
-        on_data,
+        onData,
       });
 
       this.device_features[DFName] = df;

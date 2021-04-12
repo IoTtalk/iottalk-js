@@ -14,7 +14,7 @@ export default class {
     this.o_chans = new ChannelPool();
     this.rev = null;
     this.onSignal = null;
-    this.on_data = null;
+    this.onData = null;
     this.on_register = null;
     this.on_deregister = null;
     this.on_connect = null;
