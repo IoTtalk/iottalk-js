@@ -79,7 +79,7 @@ export default class {
     return true;
   }
 
-  DFNameFromFunc(DFName) {
+  static DFNameFromFunc(DFName) {
     if (DFName.match(/_[A-Z]?(I|O)[0-9]?$/i)) {
       return DFName.replace('_', '-');
     }
@@ -164,11 +164,11 @@ export default class {
       let onData;
       let pushData;
       if (!Array.isArray(option[df_list][i])) {
-        DFName = this.DFNameFromFunc(option[df_list][i].name);
+        DFName = this.constructor.DFNameFromFunc(option[df_list][i].name);
         param_type = null;
         onData = pushData = option[df_list][i];
       } else if (Array.isArray(option[df_list][i]) && option[df_list][i].length == 2) {
-        DFName = this.DFNameFromFunc(option[df_list][i][0].name);
+        DFName = this.constructor.DFNameFromFunc(option[df_list][i][0].name);
         param_type = option[df_list][i][1];
         onData = pushData = option[df_list][i][0];
       } else {
