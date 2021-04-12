@@ -86,7 +86,7 @@ export default class {
     return DFName;
   }
 
-  _check_parameter() {
+  checkParameters() {
     if (!this.api_url) throw new RegistrationError('api_url is required.');
 
     if (!this.device_model) throw new RegistrationError('device_model not given.');
@@ -100,7 +100,7 @@ export default class {
   }
 
   run() {
-    this._check_parameter();
+    this.checkParameters();
 
     this.dan = new Client();
 
