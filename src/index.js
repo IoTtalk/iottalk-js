@@ -1,4 +1,4 @@
-import dai from './dai.js';
-import * as dan from './dan.js';
+import dai from './dai';
+import * as dan from './dan';
 
 export { dai, dan };
