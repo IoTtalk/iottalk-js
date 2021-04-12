@@ -2,14 +2,14 @@ import { ArgumentError } from './exceptions';
 
 export default class {
   constructor(params) {
-    this.df_name = params.df_name;
-    if (!this.df_name) {
+    this.DFName = params.DFName;
+    if (!this.DFName) {
       throw new ArgumentError('device feature name is required.');
     }
 
     this.df_type = params.df_type; // idf | odf
     if (this.df_type !== 'idf' && this.df_type !== 'odf') {
-      throw new ArgumentError(`${this.df_name} df_type must be "idf" or "odf"`);
+      throw new ArgumentError(`${this.DFName} df_type must be "idf" or "odf"`);
     }
 
     this.param_type = params.param_type || [null];

@@ -32,36 +32,36 @@ export default class {
     this.parse_df_profile(option, 'odf');
   }
 
-  push_data(df_name) {
-    if (this.device_features[df_name].push_data == null) return;
-    const _df_interval = this.interval[df_name] !== undefined ? this.interval[df_name] : this.push_interval;
-    console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} s]`);
+  push_data(DFName) {
+    if (this.device_features[DFName].push_data == null) return;
+    const _df_interval = this.interval[DFName] !== undefined ? this.interval[DFName] : this.push_interval;
+    console.debug(`${DFName} : ${this.flags[DFName]} [message / ${_df_interval} s]`);
     const _push_interval = setInterval(() => {
-      const _data = this.device_features[df_name].push_data();
-      if (!this.flags[df_name]) {
+      const _data = this.device_features[DFName].push_data();
+      if (!this.flags[DFName]) {
         clearInterval(_push_interval);
         return;
       }
       if (_data === undefined) {
         return;
       }
-      this.dan.push(df_name, _data);
+      this.dan.push(DFName, _data);
     }, _df_interval * 1000);
   }
 
   on_signal(signal, df_list) {
     console.log(`Receive signal: ${signal}, ${df_list}`);
     if (signal == 'CONNECT') {
-      df_list.forEach((df_name) => {
-        if (this.flags[df_name]) {
+      df_list.forEach((DFName) => {
+        if (this.flags[DFName]) {
           return;
         }
-        this.flags[df_name] = true;
-        this.push_data(df_name);
+        this.flags[DFName] = true;
+        this.push_data(DFName);
       });
     } else if (signal == 'DISCONNECT') {
-      df_list.forEach((df_name) => {
-        this.flags[df_name] = false;
+      df_list.forEach((DFName) => {
+        this.flags[DFName] = false;
       });
     } else if (signal == 'SUSPEND') {
       // Not use
@@ -71,9 +71,9 @@ export default class {
     return true;
   }
 
-  on_data(df_name, data) {
+  on_data(DFName, data) {
     try {
-      this.device_features[df_name].on_data(data);
+      this.device_features[DFName].on_data(data);
     } catch (err) {
       console.error(err);
       return false;
@@ -81,11 +81,11 @@ export default class {
     return true;
   }
 
-  df_func_name(df_name) {
-    if (df_name.match(/_[A-Z]?(I|O)[0-9]?$/i)) {
-      return df_name.replace('_', '-');
+  df_func_name(DFName) {
+    if (DFName.match(/_[A-Z]?(I|O)[0-9]?$/i)) {
+      return DFName.replace('_', '-');
     }
-    return df_name;
+    return DFName;
   }
 
   _check_parameter() {
@@ -109,9 +109,9 @@ export default class {
     const idf_list = [];
     const odf_list = [];
 
-    for (const [df_name, df] of Object.entries(this.device_features)) {
-      if (df.df_type == 'idf') idf_list.push([df_name, df.df_type]);
-      else odf_list.push([df_name, df.df_type]);
+    for (const [DFName, df] of Object.entries(this.device_features)) {
+      if (df.df_type == 'idf') idf_list.push([DFName, df.df_type]);
+      else odf_list.push([DFName, df.df_type]);
     }
 
     const msg = {
@@ -161,16 +161,16 @@ export default class {
   parse_df_profile(option, typ) {
     const df_list = `${typ}_list`;
     for (let i = 0; i < option[df_list].length; i++) {
-      let df_name;
+      let DFName;
       let param_type;
       let on_data;
       let push_data;
       if (!Array.isArray(option[df_list][i])) {
-        df_name = this.df_func_name(option[df_list][i].name);
+        DFName = this.df_func_name(option[df_list][i].name);
         param_type = null;
         on_data = push_data = option[df_list][i];
       } else if (Array.isArray(option[df_list][i]) && option[df_list][i].length == 2) {
-        df_name = this.df_func_name(option[df_list][i][0].name);
+        DFName = this.df_func_name(option[df_list][i][0].name);
         param_type = option[df_list][i][1];
         on_data = push_data = option[df_list][i][0];
       } else {
@@ -178,14 +178,14 @@ export default class {
       }
 
       const df = new DeviceFeature({
-        df_name,
+        DFName,
         df_type: typ,
         param_type,
         push_data,
         on_data,
       });
 
-      this.device_features[df_name] = df;
+      this.device_features[DFName] = df;
     }
   }
 }
