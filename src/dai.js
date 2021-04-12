@@ -32,21 +32,21 @@ export default class {
     this.parse_df_profile(option, 'odf');
   }
 
-  push_data(DFName) {
-    if (this.device_features[DFName].push_data == null) return;
-    const _df_interval = this.interval[DFName] !== undefined ? this.interval[DFName] : this.push_interval;
-    console.debug(`${DFName} : ${this.flags[DFName]} [message / ${_df_interval} s]`);
-    const _push_interval = setInterval(() => {
-      const _data = this.device_features[DFName].push_data();
+  pushData(DFName) {
+    if (this.device_features[DFName].pushData == null) return;
+    const interval = this.interval[DFName] !== undefined ? this.interval[DFName] : this.push_interval;
+    console.debug(`${DFName} : ${this.flags[DFName]} [message / ${interval} s]`);
+    const pushInterval = setInterval(() => {
+      const data = this.device_features[DFName].pushData();
       if (!this.flags[DFName]) {
-        clearInterval(_push_interval);
+        clearInterval(pushInterval);
         return;
       }
-      if (_data === undefined) {
+      if (data === undefined) {
         return;
       }
-      this.dan.push(DFName, _data);
-    }, _df_interval * 1000);
+      this.dan.push(DFName, data);
+    }, interval * 1000);
   }
 
   on_signal(signal, df_list) {
@@ -57,7 +57,7 @@ export default class {
           return;
         }
         this.flags[DFName] = true;
-        this.push_data(DFName);
+        this.pushData(DFName);
       });
     } else if (signal == 'DISCONNECT') {
       df_list.forEach((DFName) => {
@@ -164,15 +164,15 @@ export default class {
       let DFName;
       let param_type;
       let on_data;
-      let push_data;
+      let pushData;
       if (!Array.isArray(option[df_list][i])) {
         DFName = this.df_func_name(option[df_list][i].name);
         param_type = null;
-        on_data = push_data = option[df_list][i];
+        on_data = pushData = option[df_list][i];
       } else if (Array.isArray(option[df_list][i]) && option[df_list][i].length == 2) {
         DFName = this.df_func_name(option[df_list][i][0].name);
         param_type = option[df_list][i][1];
-        on_data = push_data = option[df_list][i][0];
+        on_data = pushData = option[df_list][i][0];
       } else {
         throw new RegistrationError(`Invalid ${df_list}, usage: [df_func, ...] or [[df_func, type], ...]`);
       }
@@ -181,7 +181,7 @@ export default class {
         DFName,
         df_type: typ,
         param_type,
-        push_data,
+        pushData,
         on_data,
       });
 
