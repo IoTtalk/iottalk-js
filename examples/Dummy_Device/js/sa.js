@@ -10,7 +10,7 @@ $(() => {
   }
 
   const option = {
-    api_url: 'https://iottalk2.tw/csm',
+    apiUrl: 'https://iottalk2.tw/csm',
     device_model: 'Dummy_Device',
     device_addr: 'c96ca71c-9e48-2a23-2868-acb420a2f105',
     device_name: 'Dummy',

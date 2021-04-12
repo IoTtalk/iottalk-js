@@ -4,7 +4,7 @@ import { RegistrationError, ArgumentError } from './exceptions';
 
 export default class {
   constructor(option) {
-    this.api_url = option.api_url;
+    this.apiUrl = option.apiUrl;
     this.device_model = option.device_model;
     this.device_addr = option.device_addr;
     this.device_name = option.device_name;
@@ -87,7 +87,7 @@ export default class {
   }
 
   checkParameters() {
-    if (!this.api_url) throw new RegistrationError('api_url is required.');
+    if (!this.apiUrl) throw new RegistrationError('apiUrl is required.');
 
     if (!this.device_model) throw new RegistrationError('device_model not given.');
 
@@ -108,12 +108,12 @@ export default class {
     const odfList = [];
 
     for (const [DFName, df] of Object.entries(this.device_features)) {
-      if (df.df_type == 'idf') idfList.push([DFName, df.df_type]);
+      if (df.df_type === 'idf') idfList.push([DFName, df.df_type]);
       else odfList.push([DFName, df.df_type]);
     }
 
     const option = {
-      url: this.api_url,
+      url: this.apiUrl,
       onSignal: this.onSignal,
       onData: this.onData,
       accept_protos: ['mqtt'],
