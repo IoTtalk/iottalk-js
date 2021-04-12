@@ -5,7 +5,7 @@ import { RegistrationError, ArgumentError } from './exceptions';
 export default class {
   constructor(option) {
     this.apiUrl = option.apiUrl;
-    this.device_model = option.device_model;
+    this.deviceModel = option.deviceModel;
     this.device_addr = option.device_addr;
     this.device_name = option.device_name;
     this.persistent_binding = option.persistent_binding || false;
@@ -89,7 +89,7 @@ export default class {
   checkParameters() {
     if (!this.apiUrl) throw new RegistrationError('apiUrl is required.');
 
-    if (!this.device_model) throw new RegistrationError('device_model not given.');
+    if (!this.deviceModel) throw new RegistrationError('deviceModel not given.');
 
     if (this.persistent_binding && !this.device_addr) {
       throw new ArgumentError('In case of `persistent_binding` set to `True`, '
@@ -122,7 +122,7 @@ export default class {
       odfList,
       name: this.device_name,
       profile: {
-        model: this.device_model,
+        model: this.deviceModel,
         u_name: this.username,
         extra_setup_webpage: this.extra_setup_webpage,
         device_webpage: this.device_webpage,
