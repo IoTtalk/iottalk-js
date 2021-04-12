@@ -1,4 +1,4 @@
-import ChannelPool from './channel-pool.js';
+import ChannelPool from './channel-pool';
 
 export default class {
   constructor() {
