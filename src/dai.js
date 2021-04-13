@@ -15,7 +15,7 @@ export default class {
 
     this.onRegister = option.onRegister;
     this.onDeregister = option.onDeregister;
-    this.on_connect = option.on_connect;
+    this.onConnect = option.onConnect;
     this.on_disconnect = option.on_disconnect;
 
     this.pushInterval = option.pushInterval !== undefined ? option.pushInterval : 1;
@@ -132,7 +132,7 @@ export default class {
       },
       onRegister: this.onRegister,
       onDeregister: this.onDeregister,
-      on_connect: this.on_connect,
+      onConnect: this.onConnect,
       on_disconnect: () => {
         Object.keys(this.flags).forEach((i) => { this.flags[i] = false; });
         console.debug(`on_disconnect: _flag = ${this.flags}`);

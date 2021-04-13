@@ -9,7 +9,7 @@ export class Client {
     this.ctx = new Context();
     this._first_publish = false;
     this._is_reconnect = false;
-    this.on_connect = this.on_connect.bind(this);
+    this.onConnect = this.onConnect.bind(this);
     this.on_disconnect = this.on_disconnect.bind(this);
   }
 
@@ -64,7 +64,7 @@ export class Client {
     });
   }
 
-  on_connect() {
+  onConnect() {
     console.info('mqtt_connect');
 
     let promise_thing;
@@ -105,8 +105,8 @@ export class Client {
 
       this._is_reconnect = true;
 
-      if (this.ctx.on_connect) {
-        this.ctx.on_connect();
+      if (this.ctx.onConnect) {
+        this.ctx.onConnect();
       }
     }).catch((err) => {
       console.error(err);
@@ -190,7 +190,7 @@ export class Client {
     // other callbacks
     this.ctx.onRegister = params.onRegister;
     this.ctx.onDeregister = params.onDeregister;
-    this.ctx.on_connect = params.on_connect;
+    this.ctx.onConnect = params.onConnect;
     this.ctx.on_disconnect = params.on_disconnect;
 
     // filter out the empty `df_list`, in case of empty list, server reponsed 403.
@@ -232,7 +232,7 @@ export class Client {
           keepalive: 30, // seems 60 is problematic for default mosquitto setup
         });
 
-        this.ctx.mqtt_client.on('connect', this.on_connect);
+        this.ctx.mqtt_client.on('connect', this.onConnect);
         this.ctx.mqtt_client.on('reconnect', () => {
           console.info('mqtt_reconnect');
         });
