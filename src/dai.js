@@ -19,7 +19,7 @@ export default class {
     this.on_connect = option.on_connect;
     this.on_disconnect = option.on_disconnect;
 
-    this.push_interval = option.push_interval !== undefined ? option.push_interval : 1;
+    this.pushInterval = option.pushInterval !== undefined ? option.pushInterval : 1;
     this.interval = option.interval || {};
 
     this.device_features = {};
@@ -35,7 +35,7 @@ export default class {
   pushData(DFName) {
     if (this.device_features[DFName].pushData == null) return;
     const interval = this.interval[DFName] !== undefined
-      ? this.interval[DFName] : this.push_interval;
+      ? this.interval[DFName] : this.pushInterval;
     console.debug(`${DFName} : ${this.flags[DFName]} [message / ${interval} s]`);
     const pushInterval = setInterval(() => {
       const data = this.device_features[DFName].pushData();

@@ -17,7 +17,7 @@ $(() => {
     persistentBinding: true,
     idfList: [[Dummy_Sensor, ['int']]],
     odfList: [Dummy_Control],
-    push_interval: 0,
+    pushInterval: 0,
     interval: {
       Dummy_Sensor: 1.5,
     },
