@@ -94,7 +94,7 @@ const da = new iottalkjs.DAI({ ... });
 da.run();
 ```
 
-## `class iottaljs.DAN.Client`
+## `class iottalkjs.DAN.Client`
 
 ### `client.push(idf, data, [qos])`
 
