@@ -3,17 +3,18 @@
 
 <head>
   <title>Dummy_Device</title>
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
-    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="build/iottalkjs-web.js"></script>
   <script src="js/sa.js"></script>
 </head>
 
 <body>
-  <legend>Dummy_Sensor</legend>
-  <legend class='IDF_value'>_____________</legend>
-  <legend>Dummy_Control</legend>
-  <legend class='ODF_value'>_____________</legend>
+  <label for="idf">Dummy_Sensor:</label>
+  <input readonly type="text" id="idf" value=""/>
+
+  <hr/>
+
+  <label for="odf">Dummy_Control:</label>
+  <input readonly type="text" id="odf" value=""/>
 </body>
 
 </html>
