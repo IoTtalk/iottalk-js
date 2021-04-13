@@ -1,3 +1,6 @@
+/* global $:readonly iottalkjs:readonly */
+/* eslint camelcase: ["error", {"allow": ["Dummy_Sensor", "Dummy_Control"]}] */
+
 $(() => {
   function Dummy_Sensor() {
     const number = Math.floor((1 + Math.random()) * 0x10000);
@@ -6,7 +9,7 @@ $(() => {
   }
 
   function Dummy_Control(data) {
-    $('.ODF_value')[0].innerText = data[0];
+    [$('.ODF_value')[0].innerText] = data;
   }
 
   const option = {
@@ -23,5 +26,6 @@ $(() => {
     },
   };
 
-  new iottalkjs.dai(option).run();
+  const da = new iottalkjs.DAI(option);
+  da.run();
 });

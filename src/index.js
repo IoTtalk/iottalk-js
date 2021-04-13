@@ -1,4 +1,4 @@
-import dai from './dai';
-import * as dan from './dan';
+import DAI from './dai';
+import * as DAN from './dan';
 
-export { dai, dan };
+export { DAI, DAN };
