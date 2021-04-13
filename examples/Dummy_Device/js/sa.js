@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     deviceModel: 'Dummy_Device',
     deviceName: 'MyDummyDevice',
     idfList: [[Dummy_Sensor, ['int']]],
-    odfList: [Dummy_Control],
+    odfList: [[Dummy_Control, ['int']]],
     pushInterval: 0,
     interval: {
       Dummy_Sensor: 1,
