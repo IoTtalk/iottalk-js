@@ -1,25 +1,23 @@
-import { ArgumentError } from './exceptions.js';
+import { ArgumentError } from './exceptions';
+
 export default class {
-
-    constructor(params) {
-        this.df_name = params['df_name'];
-        if (!this.df_name) {
-            throw new ArgumentError('device feature name is required.');
-        }
-
-        this.df_type = params['df_type'];  // idf | odf
-        if (this.df_type != 'idf' && this.df_type != 'odf') {
-            throw new ArgumentError(`${this.df_name} df_type must be "idf" or "odf"`);
-        }
-
-        this.param_type = params['param_type'] || [null];
-
-        this.on_data = null
-        if (params['df_type'] == 'odf' && params['on_data'])
-            this.on_data = params['on_data'];
-
-        this.push_data = null
-        if (params['df_type'] == 'idf' && params['push_data'])
-            this.push_data = params['push_data'];
+  constructor(params) {
+    this.DFName = params.DFName;
+    if (!this.DFName) {
+      throw new ArgumentError('device feature name is required.');
     }
+
+    this.DFType = params.DFType; // idf | odf
+    if (this.DFType !== 'idf' && this.DFType !== 'odf') {
+      throw new ArgumentError(`${this.DFName} DFType must be "idf" or "odf"`);
+    }
+
+    this.paramType = params.paramType || [null];
+
+    this.onData = null;
+    if (params.DFType === 'odf' && params.onData) this.onData = params.onData;
+
+    this.pushData = null;
+    if (params.DFType === 'idf' && params.pushData) this.pushData = params.pushData;
+  }
 }
