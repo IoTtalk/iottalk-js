@@ -45,7 +45,7 @@ yarn add iottalk-js
 
 #### constructor `iottalkjs.DAI(option)`
 
-`options` is a `Object`:
+`options` is an `object`:
 
 - `apiUrl` (`string`): The CSM API URL.
 - `deviceModel` (`string`)
