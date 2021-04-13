@@ -188,7 +188,7 @@ export class Client {
     };
 
     // other callbacks
-    this.ctx.on_register = params.on_register;
+    this.ctx.onRegister = params.onRegister;
     this.ctx.on_deregister = params.on_deregister;
     this.ctx.on_connect = params.on_connect;
     this.ctx.on_disconnect = params.on_disconnect;
@@ -253,8 +253,8 @@ export class Client {
           }
         }, 5000);
 
-        if (this.ctx.on_register) {
-          this.ctx.on_register();
+        if (this.ctx.onRegister) {
+          this.ctx.onRegister();
         }
       })
       .catch((err) => {

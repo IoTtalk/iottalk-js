@@ -15,7 +15,7 @@ export default class {
     this.rev = null;
     this.onSignal = null;
     this.onData = null;
-    this.on_register = null;
+    this.onRegister = null;
     this.on_deregister = null;
     this.on_connect = null;
     this.on_disconnect = null;

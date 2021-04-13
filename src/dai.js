@@ -13,7 +13,7 @@ export default class {
     this.extraSetupWebpage = option.extraSetupWebpage || '';
     this.deviceWebpage = option.deviceWebpage || '';
 
-    this.on_register = option.on_register;
+    this.onRegister = option.onRegister;
     this.on_deregister = option.on_deregister;
     this.on_connect = option.on_connect;
     this.on_disconnect = option.on_disconnect;
@@ -130,7 +130,7 @@ export default class {
         extra_setup_webpage: this.extraSetupWebpage,
         device_webpage: this.deviceWebpage,
       },
-      on_register: this.on_register,
+      onRegister: this.onRegister,
       on_deregister: this.on_deregister,
       on_connect: this.on_connect,
       on_disconnect: () => {
