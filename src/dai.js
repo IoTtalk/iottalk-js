@@ -14,7 +14,7 @@ export default class {
     this.deviceWebpage = option.deviceWebpage || '';
 
     this.onRegister = option.onRegister;
-    this.on_deregister = option.on_deregister;
+    this.onDeregister = option.onDeregister;
     this.on_connect = option.on_connect;
     this.on_disconnect = option.on_disconnect;
 
@@ -131,7 +131,7 @@ export default class {
         device_webpage: this.deviceWebpage,
       },
       onRegister: this.onRegister,
-      on_deregister: this.on_deregister,
+      onDeregister: this.onDeregister,
       on_connect: this.on_connect,
       on_disconnect: () => {
         Object.keys(this.flags).forEach((i) => { this.flags[i] = false; });

@@ -189,7 +189,7 @@ export class Client {
 
     // other callbacks
     this.ctx.onRegister = params.onRegister;
-    this.ctx.on_deregister = params.on_deregister;
+    this.ctx.onDeregister = params.onDeregister;
     this.ctx.on_connect = params.on_connect;
     this.ctx.on_disconnect = params.on_disconnect;
 
@@ -280,8 +280,8 @@ export class Client {
       .send(JSON.stringify({ rev: this.ctx.rev }))
       .then((res) => {
         this.ctx.mqtt_client = null;
-        if (this.ctx.on_deregister) {
-          this.ctx.on_deregister();
+        if (this.ctx.onDeregister) {
+          this.ctx.onDeregister();
         }
       }, (err) => {
         console.error('deregister fail', err);
