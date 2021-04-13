@@ -256,7 +256,7 @@ export class Client {
         }, 5000);
 
         if (this.ctx.onRegister) {
-          this.ctx.onRegister();
+          this.ctx.onRegister(this);
         }
       })
       .catch((err) => {

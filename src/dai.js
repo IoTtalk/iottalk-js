@@ -159,21 +159,35 @@ export default class {
 
   parseDFProfile(option, typ) {
     const DFList = `${typ}List`;
+    if (option[DFList] === undefined) return;
+
     option[DFList].forEach((x) => {
       let DFName;
       let paramType;
       let onData;
       let pushData;
 
-      if (!Array.isArray(x)) {
-        DFName = this.constructor.DFNameFromFunc(x.name);
+      if (!Array.isArray(x)) { // `[idf]` or `[idfFunc]`
+        if (typeof x === 'string') {
+          DFName = x;
+          onData = null;
+          pushData = null;
+        } else { // in case of callable
+          DFName = this.constructor.DFNameFromFunc(x.name);
+          onData = x;
+          pushData = x;
+        }
         paramType = null;
-        onData = x;
-        pushData = x;
       } else if (Array.isArray(x) && x.length === 2) {
-        DFName = this.constructor.DFNameFromFunc(x[0].name);
-        [onData, paramType] = x;
-        [pushData] = x;
+        if (typeof x[0] === 'string') {
+          [DFName, paramType] = x;
+          onData = null;
+          pushData = null;
+        } else {
+          DFName = this.constructor.DFNameFromFunc(x[0].name);
+          [onData, paramType] = x;
+          [pushData] = x;
+        }
       } else {
         throw new RegistrationError(`Invalid ${DFList}, usage: [dfFunc, ...] or [[dfFunc, type], ...]`);
       }
