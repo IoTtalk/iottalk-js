@@ -14,14 +14,14 @@ export class Client {
   }
 
   publish(channel, message, retained, qos) {
-    if (!this.ctx.mqtt_client) throw 'unable to publish without ctx.mqtt_client';
+    if (!this.ctx.mqttClient) throw 'unable to publish without ctx.mqttClient';
 
     if (retained === undefined) retained = false;
 
     if (qos === undefined) qos = 2;
 
     return new Promise((resolve, reject) => {
-      this.ctx.mqtt_client.publish(channel,
+      this.ctx.mqttClient.publish(channel,
         JSON.stringify(message),
         { retain: retained, qos },
         (err) => {
@@ -34,12 +34,12 @@ export class Client {
   }
 
   subscribe(channel, qos) {
-    if (!this.ctx.mqtt_client) return;
+    if (!this.ctx.mqttClient) return;
 
     if (qos === undefined) qos = 2;
 
     return new Promise((resolve, reject) => {
-      this.ctx.mqtt_client.subscribe(channel,
+      this.ctx.mqttClient.subscribe(channel,
         { qos },
         (err, granted) => {
           if (err) {
@@ -51,10 +51,10 @@ export class Client {
   }
 
   unsubscribe(channel) {
-    if (!this.ctx.mqtt_client) return;
+    if (!this.ctx.mqttClient) return;
 
     return new Promise((resolve, reject) => {
-      this.ctx.mqtt_client.unsubscribe(channel,
+      this.ctx.mqttClient.unsubscribe(channel,
         (err) => {
           if (err) {
             return reject(err);
@@ -70,7 +70,7 @@ export class Client {
     let promise_thing;
 
     if (!this._is_reconnect) {
-      promise_thing = this.subscribe(this.ctx.o_chans.ctrl)
+      promise_thing = this.subscribe(this.ctx.OChans.ctrl)
         .then(() => {
           console.log(`Successfully connect to ${this.ctx.url}`);
           console.log(`Device ID: ${this.ctx.appID}`);
@@ -85,18 +85,18 @@ export class Client {
     } else {
       console.info(`Reconnect: ${this.ctx.name}.`);
       promise_thing = this.publish(
-        this.ctx.i_chans.ctrl,
+        this.ctx.IChans.ctrl,
         { state: 'offline', rev: this.ctx.rev },
         true, // retained message
       );
     }
 
     promise_thing.then(() => {
-      this.ctx.i_chans.removeAllDF();
-      this.ctx.o_chans.removeAllDF();
+      this.ctx.IChans.removeAllDF();
+      this.ctx.OChans.removeAllDF();
 
       this.publish(
-        this.ctx.i_chans.ctrl,
+        this.ctx.IChans.ctrl,
         { state: 'online', rev: this.ctx.rev },
         true, // retained message
       ).then(() => {
@@ -114,31 +114,31 @@ export class Client {
   }
 
   on_message(topic, message) {
-    if (topic == this.ctx.o_chans.ctrl) {
+    if (topic == this.ctx.OChans.ctrl) {
       const signal = JSON.parse(message);
       let handling_result = null;
       switch (signal.command) {
         case 'CONNECT':
           if ('idf' in signal) {
             const { idf } = signal;
-            this.ctx.i_chans.add(idf, signal.topic);
+            this.ctx.IChans.add(idf, signal.topic);
             handling_result = this.ctx.onSignal(signal.command, [idf]);
           } else if ('odf' in signal) {
             const { odf } = signal;
-            this.ctx.o_chans.add(odf, signal.topic);
+            this.ctx.OChans.add(odf, signal.topic);
             handling_result = this.ctx.onSignal(signal.command, [odf]);
-            this.subscribe(this.ctx.o_chans.topic(odf));
+            this.subscribe(this.ctx.OChans.topic(odf));
           }
           break;
         case 'DISCONNECT':
           if ('idf' in signal) {
             const { idf } = signal;
-            this.ctx.i_chans.removeDF(idf);
+            this.ctx.IChans.removeDF(idf);
             handling_result = this.ctx.onSignal(signal.command, [idf]);
           } else if ('odf' in signal) {
             const { odf } = signal;
-            this.unsubscribe(this.ctx.o_chans.topic(odf));
-            this.ctx.o_chans.removeDF(odf);
+            this.unsubscribe(this.ctx.OChans.topic(odf));
+            this.ctx.OChans.removeDF(odf);
             handling_result = this.ctx.onSignal(signal.command, [odf]);
           }
           break;
@@ -152,9 +152,9 @@ export class Client {
         res_message.state = 'error';
         res_message.reason = handling_result[1];
       }
-      this.publish(this.ctx.i_chans.ctrl, res_message);
+      this.publish(this.ctx.IChans.ctrl, res_message);
     } else {
-      const odf = this.ctx.o_chans.df(topic);
+      const odf = this.ctx.OChans.df(topic);
       if (!odf) return;
       this.ctx.onData(odf, JSON.parse(message));
     }
@@ -168,7 +168,7 @@ export class Client {
   }
 
   register(params) {
-    if (this.ctx.mqtt_client) {
+    if (this.ctx.mqttClient) {
       throw new RegistrationError('Already registered');
     }
 
@@ -211,20 +211,20 @@ export class Client {
         }
 
         this.ctx.name = metadata.name;
-        this.ctx.mqtt_host = metadata.url.host;
-        this.ctx.mqtt_port = metadata.url.ws_port;
-        this.ctx.mqtt_username = metadata.username || '';
-        this.ctx.mqtt_password = metadata.password || '';
-        this.ctx.i_chans.ctrl = metadata.ctrl_chans[0];
-        this.ctx.o_chans.ctrl = metadata.ctrl_chans[1];
+        this.ctx.mqttHost = metadata.url.host;
+        this.ctx.mqttPort = metadata.url.ws_port;
+        this.ctx.mqttUsername = metadata.username || '';
+        this.ctx.mqttPassword = metadata.password || '';
+        this.ctx.IChans.ctrl = metadata.ctrl_chans[0];
+        this.ctx.OChans.ctrl = metadata.ctrl_chans[1];
         this.ctx.rev = metadata.rev;
 
-        this.ctx.mqtt_client = mqtt.connect(`${metadata.url.ws_scheme}://${this.ctx.mqtt_host}:${this.ctx.mqtt_port}`, {
+        this.ctx.mqttClient = mqtt.connect(`${metadata.url.ws_scheme}://${this.ctx.mqttHost}:${this.ctx.mqttPort}`, {
           clientId: `iottalk-js-${this.ctx.appID}`,
-          username: this.ctx.mqtt_username,
-          password: this.ctx.mqtt_password,
+          username: this.ctx.mqttUsername,
+          password: this.ctx.mqttPassword,
           will: {
-            topic: this.ctx.i_chans.ctrl,
+            topic: this.ctx.IChans.ctrl,
             // in most case of js DA, it never connect back
             payload: JSON.stringify({ state: 'offline', rev: this.ctx.rev }),
             retain: true,
@@ -232,15 +232,15 @@ export class Client {
           keepalive: 30, // seems 60 is problematic for default mosquitto setup
         });
 
-        this.ctx.mqtt_client.on('connect', this.onConnect);
-        this.ctx.mqtt_client.on('reconnect', () => {
+        this.ctx.mqttClient.on('connect', this.onConnect);
+        this.ctx.mqttClient.on('reconnect', () => {
           console.info('mqtt_reconnect');
         });
-        this.ctx.mqtt_client.on('disconnect', this.onDisconnect);
-        this.ctx.mqtt_client.on('error', (error) => {
+        this.ctx.mqttClient.on('disconnect', this.onDisconnect);
+        this.ctx.mqttClient.on('error', (error) => {
           console.error('mqtt_error', error);
         });
-        this.ctx.mqtt_client.on('message', (topic, message, packet) => {
+        this.ctx.mqttClient.on('message', (topic, message, packet) => {
           this.on_message(topic, message.toString()); // Convert message from Uint8Array to String
         });
 
@@ -263,23 +263,23 @@ export class Client {
   }
 
   deregister() {
-    if (!this.ctx.mqtt_client) {
+    if (!this.ctx.mqttClient) {
       throw new RegistrationError('Not registered');
     }
 
     this.publish(
-      this.ctx.i_chans.ctrl,
+      this.ctx.IChans.ctrl,
       { state: 'offline', rev: this.ctx.rev },
       true,
     );
-    this.ctx.mqtt_client.end();
+    this.ctx.mqttClient.end();
 
     superagent.del(`${this.ctx.url}/${this.ctx.appID}`)
       .type('json')
       .accept('json')
       .send(JSON.stringify({ rev: this.ctx.rev }))
       .then((res) => {
-        this.ctx.mqtt_client = null;
+        this.ctx.mqttClient = null;
         if (this.ctx.onDeregister) {
           this.ctx.onDeregister();
         }
@@ -289,10 +289,10 @@ export class Client {
   }
 
   push(idf_name, data, qos) {
-    if (!this.ctx.mqtt_client || !this._first_publish) {
+    if (!this.ctx.mqttClient || !this._first_publish) {
       throw new RegistrationError('Not registered');
     }
-    if (!this.ctx.i_chans.topic(idf_name)) {
+    if (!this.ctx.IChans.topic(idf_name)) {
       return;
     }
     if (qos === undefined) qos = 1;
@@ -301,7 +301,7 @@ export class Client {
       data = [data];
     }
 
-    this.publish(this.ctx.i_chans.topic(idf_name), data, false, qos);
+    this.publish(this.ctx.IChans.topic(idf_name), data, false, qos);
   }
 }
 
