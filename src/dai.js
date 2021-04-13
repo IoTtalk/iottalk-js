@@ -1,203 +1,206 @@
-import DeviceFeature from './device-feature.js';
-import { Client } from './dan.js';
-import { RegistrationError, ArgumentError } from './exceptions.js';
+import DeviceFeature from './device-feature';
+import { Client } from './dan';
+import { RegistrationError, ArgumentError } from './exceptions';
 
 export default class {
+  constructor(option) {
+    this.apiUrl = option.apiUrl;
+    this.deviceModel = option.deviceModel;
+    this.deviceAddr = option.deviceAddr;
+    this.deviceName = option.deviceName;
+    this.persistentBinding = option.persistentBinding || false;
+    this.username = option.username;
+    this.extraSetupWebpage = option.extraSetupWebpage || '';
+    this.deviceWebpage = option.deviceWebpage || '';
 
-    constructor(option) {
-        this.api_url = option['api_url'];
-        this.device_model = option['device_model'];
-        this.device_addr = option['device_addr'];
-        this.device_name = option['device_name'];
-        this.persistent_binding = option['persistent_binding'] || false;
-        this.username = option['username'];
-        this.extra_setup_webpage = option['extra_setup_webpage'] || '';
-        this.device_webpage = option['device_webpage'] || '';
+    this.onRegister = option.onRegister;
+    this.onDeregister = option.onDeregister;
+    this.onConnect = option.onConnect;
+    this.onDisconnect = option.onDisconnect;
 
-        this.register_callback = option['register_callback'];
-        this.on_register = option['on_register'];
-        this.on_deregister = option['on_deregister'];
-        this.on_connect = option['on_connect'];
-        this.on_disconnect = option['on_disconnect'];
+    this.pushInterval = option.pushInterval !== undefined ? option.pushInterval : 1;
+    this.interval = option.interval || {};
 
-        this.push_interval = option['push_interval'] != undefined ? option['push_interval'] : 1;
-        this.interval = option['interval'] || {};
+    this.device_features = {};
+    this.flags = {};
 
-        this.device_features = {};
-        this.flags = {};
+    this.onSignal = this.onSignal.bind(this);
+    this.onData = this.onData.bind(this);
 
-        this.on_signal = this.on_signal.bind(this);
-        this.on_data = this.on_data.bind(this);
+    this.parseDFProfile(option, 'idf');
+    this.parseDFProfile(option, 'odf');
+  }
 
-        this.parse_df_profile(option, 'idf');
-        this.parse_df_profile(option, 'odf');
+  pushData(DFName) {
+    if (this.device_features[DFName].pushData == null) return;
+    const interval = this.interval[DFName] !== undefined
+      ? this.interval[DFName] : this.pushInterval;
+    console.debug(`${DFName} : ${this.flags[DFName]} [message / ${interval} s]`);
+    const pushInterval = setInterval(() => {
+      const data = this.device_features[DFName].pushData();
+      if (!this.flags[DFName]) {
+        clearInterval(pushInterval);
+        return;
+      }
+      if (data === undefined) {
+        return;
+      }
+      this.dan.push(DFName, data);
+    }, interval * 1000);
+  }
+
+  onSignal(signal, DFList) {
+    console.log(`Receive signal: ${signal}, ${DFList}`);
+    if (signal === 'CONNECT') {
+      DFList.forEach((DFName) => {
+        if (this.flags[DFName]) {
+          return;
+        }
+        this.flags[DFName] = true;
+        this.pushData(DFName);
+      });
+    } else if (signal === 'DISCONNECT') {
+      DFList.forEach((DFName) => { this.flags[DFName] = false; });
+    } else if (signal === 'SUSPEND') {
+      // Not use
+    } else if (signal === 'RESUME') {
+      // Not use
+    }
+    return true;
+  }
+
+  onData(DFName, data) {
+    try {
+      this.device_features[DFName].onData(data);
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+    return true;
+  }
+
+  static DFNameFromFunc(DFName) {
+    if (DFName.match(/_[A-Z]?(I|O)[0-9]?$/i)) {
+      return DFName.replace('_', '-');
+    }
+    return DFName;
+  }
+
+  checkParameters() {
+    if (!this.apiUrl) throw new RegistrationError('apiUrl is required.');
+
+    if (!this.deviceModel) throw new RegistrationError('deviceModel not given.');
+
+    if (this.persistentBinding && !this.deviceAddr) {
+      throw new ArgumentError('In case of `persistentBinding` set to `True`, '
+        + 'the `deviceAddr` should be set and fixed.');
     }
 
-    push_data(df_name) {
-        if (this.device_features[df_name].push_data == null)
-            return;
-        let _df_interval = this.interval[df_name] != undefined ? this.interval[df_name] : this.push_interval;
-        console.debug(`${df_name} : ${this.flags[df_name]} [message / ${_df_interval} s]`);
-        let _push_interval = setInterval(() => {
-            let _data = this.device_features[df_name].push_data();
-            if (!this.flags[df_name]) {
-                clearInterval(_push_interval);
-                return;
-            }
-            if (_data === undefined) {
-                return;
-            }
-            this.dan.push(df_name, _data);
+    if (Object.keys(this.device_features).length === 0) throw new RegistrationError('Neither idfList nor odfList is empty.');
+  }
 
-        }, _df_interval * 1000);
-    }
+  run() {
+    this.checkParameters();
 
-    on_signal(signal, df_list) {
-        console.log(`Receive signal: ${signal}, ${df_list}`);
-        if ('CONNECT' == signal) {
-            df_list.forEach(df_name => {
-                if (this.flags[df_name]) {
-                    return;
-                }
-                this.flags[df_name] = true;
-                this.push_data(df_name);
-            });
+    this.dan = new Client();
+
+    const idfList = [];
+    const odfList = [];
+
+    Object.entries(this.device_features).forEach(([DFName, df]) => {
+      if (df.DFType === 'idf') {
+        idfList.push([DFName, df.DFType]);
+      } else {
+        odfList.push([DFName, df.DFType]);
+      }
+    });
+
+    const option = {
+      url: this.apiUrl,
+      onSignal: this.onSignal,
+      onData: this.onData,
+      acceptProtos: ['mqtt'],
+      id: this.deviceAddr,
+      idfList,
+      odfList,
+      name: this.deviceName,
+      profile: {
+        model: this.deviceModel,
+        u_name: this.username,
+        extra_setup_webpage: this.extraSetupWebpage,
+        device_webpage: this.deviceWebpage,
+      },
+      onRegister: this.onRegister,
+      onDeregister: this.onDeregister,
+      onConnect: this.onConnect,
+      onDisconnect: () => {
+        Object.keys(this.flags).forEach((i) => { this.flags[i] = false; });
+        console.debug(`onDisconnect: _flag = ${this.flags}`);
+        if (this.onDisconnect) {
+          this.onDisconnect();
         }
-        else if ('DISCONNECT' == signal) {
-            df_list.forEach(df_name => {
-                this.flags[df_name] = false;
-            });
+      },
+    };
+
+    this.dan.register(option);
+
+    // FIXME: window is not defined in node.js
+    // eslint-disable-next-line func-names
+    window.onbeforeunload = function () {
+      try {
+        if (!this.persistentBinding) {
+          this.dan.deregister();
         }
-        else if ('SUSPEND' == signal) {
-            // Not use
+      } catch (error) {
+        console.error(`dai process cleanup exception: ${error}`);
+      }
+    };
+  }
+
+  parseDFProfile(option, typ) {
+    const DFList = `${typ}List`;
+    if (option[DFList] === undefined) return;
+
+    option[DFList].forEach((x) => {
+      let DFName;
+      let paramType;
+      let onData;
+      let pushData;
+
+      if (!Array.isArray(x)) { // `[idf]` or `[idfFunc]`
+        if (typeof x === 'string') {
+          DFName = x;
+          onData = null;
+          pushData = null;
+        } else { // in case of callable
+          DFName = this.constructor.DFNameFromFunc(x.name);
+          onData = x;
+          pushData = x;
         }
-        else if ('RESUME' == signal) {
-            // Not use
+        paramType = null;
+      } else if (Array.isArray(x) && x.length === 2) {
+        if (typeof x[0] === 'string') {
+          [DFName, paramType] = x;
+          onData = null;
+          pushData = null;
+        } else {
+          DFName = this.constructor.DFNameFromFunc(x[0].name);
+          [onData, paramType] = x;
+          [pushData] = x;
         }
-        return true;
-    }
+      } else {
+        throw new RegistrationError(`Invalid ${DFList}, usage: [dfFunc, ...] or [[dfFunc, type], ...]`);
+      }
 
-    on_data(df_name, data) {
-        try {
-            this.device_features[df_name].on_data(data);
-        } catch (err) {
-            console.error(err);
-            return false;
-        }
-        return true;
-    }
+      const df = new DeviceFeature({
+        DFName,
+        DFType: typ,
+        paramType,
+        pushData,
+        onData,
+      });
 
-    df_func_name(df_name) {
-        if (df_name.match(/_[A-Z]?(I|O)[0-9]?$/i)) {
-            return df_name.replace('_', '-');
-        }
-        return df_name;
-    }
-
-    _check_parameter() {
-        if (!this.api_url)
-            throw new RegistrationError('api_url is required.');
-
-        if (!this.device_model)
-            throw new RegistrationError('device_model not given.');
-
-        if (this.persistent_binding && !this.device_addr)
-            throw new ArgumentError('In case of `persistent_binding` set to `True`, ' +
-                'the `device_addr` should be set and fixed.');
-
-        if (Object.keys(this.device_features).length === 0)
-            throw new RegistrationError('Neither idf_list nor odf_list is empty.');
-    }
-
-    run() {
-        this._check_parameter();
-
-        this.dan = new Client();
-
-        let idf_list = [];
-        let odf_list = [];
-
-        for (const [df_name, df] of Object.entries(this.device_features)) {
-            if (df.df_type == 'idf')
-                idf_list.push([df_name, df.df_type]);
-            else
-                odf_list.push([df_name, df.df_type]);
-        }
-
-        const msg = {
-            'url': this.api_url,
-            'on_signal': this.on_signal,
-            'on_data': this.on_data,
-            'accept_protos': ['mqtt'],
-            'id': this.device_addr,
-            'idf_list': idf_list,
-            'odf_list': odf_list,
-            'name': this.device_name,
-            'profile': {
-                'model': this.device_model,
-                'u_name': this.username,
-                'extra_setup_webpage': this.extra_setup_webpage,
-                'device_webpage': this.device_webpage,
-            },
-            'register_callback': this.register_callback,
-            'on_register': this.on_register,
-            'on_deregister': this.on_deregister,
-            'on_connect': this.on_connect,
-            'on_disconnect': () => {
-                for (const key in this.flags) {
-                    this.flags[key] = false;
-                }
-                console.debug(`on_disconnect: _flag = ${this.flags}`);
-                if (on_disconnect) {
-                    return on_disconnect;
-                }
-            }
-        };
-
-        this.dan.register(msg);
-
-        // FIXME: window is not defined in node.js
-        window.onbeforeunload = function () {
-            try {
-                if (!this.persistent_binding) {
-                    this.dan.deregister();
-                }
-            } catch (error) {
-                console.error(`dai process cleanup exception: ${error}`);
-            }
-        };
-    }
-
-    parse_df_profile(option, typ) {
-        const df_list = `${typ}_list`;
-        for (let i = 0; i < option[df_list].length; i++) {
-            let df_name;
-            let param_type;
-            let on_data;
-            let push_data;
-            if (!Array.isArray(option[df_list][i])) {
-                df_name = this.df_func_name(option[df_list][i].name);
-                param_type = null;
-                on_data = push_data = option[df_list][i];
-            }
-            else if (Array.isArray(option[df_list][i]) && option[df_list][i].length == 2) {
-                df_name = this.df_func_name(option[df_list][i][0].name);
-                param_type = option[df_list][i][1];
-                on_data = push_data = option[df_list][i][0];
-            }
-            else {
-                throw new RegistrationError(`Invalid ${df_list}, usage: [df_func, ...] or [[df_func, type], ...]`);
-            }
-
-            let df = new DeviceFeature({
-                'df_name': df_name,
-                'df_type': typ,
-                'param_type': param_type,
-                'push_data': push_data,
-                'on_data': on_data
-            });
-
-            this.device_features[df_name] = df;
-        }
-    }
+      this.device_features[DFName] = df;
+    });
+  }
 }
