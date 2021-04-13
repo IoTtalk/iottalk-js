@@ -10,7 +10,7 @@ export class Client {
     this._first_publish = false;
     this._is_reconnect = false;
     this.onConnect = this.onConnect.bind(this);
-    this.on_disconnect = this.on_disconnect.bind(this);
+    this.onDisconnect = this.onDisconnect.bind(this);
   }
 
   publish(channel, message, retained, qos) {
@@ -160,10 +160,10 @@ export class Client {
     }
   }
 
-  on_disconnect() {
+  onDisconnect() {
     console.info(`${this.ctx.name} (${this.ctx.app_id}) disconnected from ${this.ctx.url}.`);
-    if (this.ctx.on_disconnect) {
-      this.ctx.on_disconnect();
+    if (this.ctx.onDisconnect) {
+      this.ctx.onDisconnect();
     }
   }
 
@@ -191,7 +191,7 @@ export class Client {
     this.ctx.onRegister = params.onRegister;
     this.ctx.onDeregister = params.onDeregister;
     this.ctx.onConnect = params.onConnect;
-    this.ctx.on_disconnect = params.on_disconnect;
+    this.ctx.onDisconnect = params.onDisconnect;
 
     // filter out the empty `df_list`, in case of empty list, server reponsed 403.
     ['idf_list', 'odf_list'].forEach(
@@ -236,7 +236,7 @@ export class Client {
         this.ctx.mqtt_client.on('reconnect', () => {
           console.info('mqtt_reconnect');
         });
-        this.ctx.mqtt_client.on('disconnect', this.on_disconnect);
+        this.ctx.mqtt_client.on('disconnect', this.onDisconnect);
         this.ctx.mqtt_client.on('error', (error) => {
           console.error('mqtt_error', error);
         });

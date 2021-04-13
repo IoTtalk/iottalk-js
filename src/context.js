@@ -18,6 +18,6 @@ export default class {
     this.onRegister = null;
     this.onDeregister = null;
     this.onConnect = null;
-    this.on_disconnect = null;
+    this.onDisconnect = null;
   }
 }
