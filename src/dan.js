@@ -183,7 +183,7 @@ export class Client {
       name: params.name,
       idf_list: params.idfList,
       odf_list: params.odfList,
-      accept_protos: params.accept_protos || 'mqtt',
+      accept_protos: params.acceptProtos || 'mqtt',
       profile: params.profile,
     };
 

@@ -10,10 +10,9 @@ export default class {
     this.deviceName = option.deviceName;
     this.persistentBinding = option.persistentBinding || false;
     this.username = option.username;
-    this.extra_setup_webpage = option.extra_setup_webpage || '';
-    this.device_webpage = option.device_webpage || '';
+    this.extraSetupWebpage = option.extraSetupWebpage || '';
+    this.deviceWebpage = option.deviceWebpage || '';
 
-    this.register_callback = option.register_callback;
     this.on_register = option.on_register;
     this.on_deregister = option.on_deregister;
     this.on_connect = option.on_connect;
@@ -120,7 +119,7 @@ export default class {
       url: this.apiUrl,
       onSignal: this.onSignal,
       onData: this.onData,
-      accept_protos: ['mqtt'],
+      acceptProtos: ['mqtt'],
       id: this.deviceAddr,
       idfList,
       odfList,
@@ -128,10 +127,9 @@ export default class {
       profile: {
         model: this.deviceModel,
         u_name: this.username,
-        extra_setup_webpage: this.extra_setup_webpage,
-        device_webpage: this.device_webpage,
+        extra_setup_webpage: this.extraSetupWebpage,
+        device_webpage: this.deviceWebpage,
       },
-      register_callback: this.register_callback,
       on_register: this.on_register,
       on_deregister: this.on_deregister,
       on_connect: this.on_connect,
