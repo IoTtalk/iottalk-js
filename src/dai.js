@@ -158,7 +158,7 @@ export default class {
   }
 
   parseDFProfile(option, typ) {
-    const DFList = `${typ}_list`;
+    const DFList = `${typ}List`;
     option[DFList].forEach((x) => {
       let DFName;
       let paramType;
@@ -175,7 +175,7 @@ export default class {
         [onData, paramType] = x;
         [pushData] = x;
       } else {
-        throw new RegistrationError(`Invalid ${DFList}, usage: [df_func, ...] or [[df_func, type], ...]`);
+        throw new RegistrationError(`Invalid ${DFList}, usage: [dfFunc, ...] or [[dfFunc, type], ...]`);
       }
 
       const df = new DeviceFeature({
