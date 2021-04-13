@@ -48,28 +48,28 @@ yarn add iottalk-js
 
 `options` is a `Object`:
 
-    - `apiUrl` (`string`): The CSM API URL.
-    - `deviceModel` (`string`)
-    - `deviceName` (`string`)
-    - `deviceAddr` (`string`): Should be a valid UUID string.
-    - `persistentBinding` (`bool`): Default is `false`.
-    - `username` (`string`): The DA owner.
-    - `extraSetupWebpage` (`string`)
-    - `deviceWebpage` (`string`)
-    - `onRegister` (`function`): A callback function with signature `function (dan)`.
-                                 the first argument is the instance of ``iottalkjs.DAN.Client`.
-    - `onDeregister` (`function`): A callback function with signature `function ()`.
-    - `onConnect` (`function`): A callback invoked on MQTT broker connected.
-    - `onDisconnect` (`function`)
-    - `pushInterval` (`number`): The push interval in second.
-    - `interval` (`object`): The key is the device feature name in `string`.
-    - `idfList` (`Array`): Should be a list of `idf, unit` pairs.
-                           Where a `idf, unit` pair can be following format:
-        - `[<function pointer>, <unit>]`: e.g.: `[Dummy_Sensor, ['dB']]`
-        - `[<df name>, <unit>]`: In this case, since the function pointer is not provided,
-                                 the auto-push won't be applied.
-                                 Please checkout the Smartphone example.
-    - `odfList` (`Array`)
+- `apiUrl` (`string`): The CSM API URL.
+- `deviceModel` (`string`)
+- `deviceName` (`string`)
+- `deviceAddr` (`string`): Should be a valid UUID string.
+- `persistentBinding` (`bool`): Default is `false`.
+- `username` (`string`): The DA owner.
+- `extraSetupWebpage` (`string`)
+- `deviceWebpage` (`string`)
+- `onRegister` (`function`): A callback function with signature `function (dan)`.
+                             the first argument is the instance of ``iottalkjs.DAN.Client`.
+- `onDeregister` (`function`): A callback function with signature `function ()`.
+- `onConnect` (`function`): A callback invoked on MQTT broker connected.
+- `onDisconnect` (`function`)
+- `pushInterval` (`number`): The push interval in second.
+- `interval` (`object`): The key is the device feature name in `string`.
+- `idfList` (`Array`): Should be a list of `idf, unit` pairs.
+                       Where a `idf, unit` pair can be following format:
+    - `[<function pointer>, <unit>]`: e.g.: `[Dummy_Sensor, ['dB']]`
+    - `[<df name>, <unit>]`: In this case, since the function pointer is not provided,
+                             the auto-push won't be applied.
+                             Please checkout the Smartphone example.
+- `odfList` (`Array`)
 
 Example:
 
