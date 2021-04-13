@@ -13,5 +13,6 @@ module.exports = {
   ignorePatterns: ['**/build/*.js'],
   rules: {
     'no-console': 'off',
+    'no-param-reassign': 'off',
   },
 };

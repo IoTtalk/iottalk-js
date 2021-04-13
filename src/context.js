@@ -10,8 +10,8 @@ export default class {
     this.mqttUsername = null;
     this.mqttPassword = null;
     this.mqttClient = null;
-    this.IChans = new ChannelPool();  // input channel
-    this.OChans = new ChannelPool();  // output channel
+    this.IChans = new ChannelPool(); // input channel
+    this.OChans = new ChannelPool(); // output channel
     this.rev = null;
     this.onSignal = null;
     this.onData = null;

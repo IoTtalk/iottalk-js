@@ -1,57 +1,57 @@
 import mqtt from 'mqtt';
 import superagent from 'superagent';
-import Context from './context.js';
-import _UUID from './uuid.js';
-import { RegistrationError } from './exceptions.js';
+import Context from './context';
+import UUID from './uuid';
+import { RegistrationError } from './exceptions';
 
 export class Client {
   constructor() {
     this.ctx = new Context();
-    this._first_publish = false;
-    this._is_reconnect = false;
+    this.firstPub = false;
+    this.IsReconnect = false;
     this.onConnect = this.onConnect.bind(this);
     this.onDisconnect = this.onDisconnect.bind(this);
   }
 
-  publish(channel, message, retained, qos) {
-    if (!this.ctx.mqttClient) throw 'unable to publish without ctx.mqttClient';
+  publish(channel, message, retain, qos) {
+    if (!this.ctx.mqttClient) throw new Error('unable to publish without ctx.mqttClient');
 
-    if (retained === undefined) retained = false;
+    if (retain === undefined) retain = false;
 
     if (qos === undefined) qos = 2;
 
     return new Promise((resolve, reject) => {
       this.ctx.mqttClient.publish(channel,
         JSON.stringify(message),
-        { retain: retained, qos },
+        { retain, qos },
         (err) => {
           if (err) {
             return reject(err);
           }
-          resolve();
+          return resolve();
         });
     });
   }
 
   subscribe(channel, qos) {
-    if (!this.ctx.mqttClient) return;
+    if (!this.ctx.mqttClient) throw new Error('unable to publish without ctx.mqttClient');
 
     if (qos === undefined) qos = 2;
 
     return new Promise((resolve, reject) => {
       this.ctx.mqttClient.subscribe(channel,
         { qos },
-        (err, granted) => {
+        (err) => {
           if (err) {
             return reject(err);
           }
-          resolve();
+          return resolve();
         });
     });
   }
 
   unsubscribe(channel) {
-    if (!this.ctx.mqttClient) return;
+    if (!this.ctx.mqttClient) throw new Error('unable to publish without ctx.mqttClient');
 
     return new Promise((resolve, reject) => {
       this.ctx.mqttClient.unsubscribe(channel,
@@ -59,7 +59,7 @@ export class Client {
           if (err) {
             return reject(err);
           }
-          resolve();
+          return resolve();
         });
     });
   }
@@ -67,10 +67,10 @@ export class Client {
   onConnect() {
     console.info('mqtt_connect');
 
-    let promise_thing;
+    let pub;
 
-    if (!this._is_reconnect) {
-      promise_thing = this.subscribe(this.ctx.OChans.ctrl)
+    if (!this.IsReconnect) {
+      pub = this.subscribe(this.ctx.OChans.ctrl)
         .then(() => {
           console.log(`Successfully connect to ${this.ctx.url}`);
           console.log(`Device ID: ${this.ctx.appID}`);
@@ -79,19 +79,19 @@ export class Client {
             document.title = this.ctx.name;
           }
         })
-        .catch((err) => {
-          throw 'Subscribe to control channel failed';
+        .catch(() => {
+          throw new Error('Subscribe to control channel failed');
         });
     } else {
       console.info(`Reconnect: ${this.ctx.name}.`);
-      promise_thing = this.publish(
+      pub = this.publish(
         this.ctx.IChans.ctrl,
         { state: 'offline', rev: this.ctx.rev },
         true, // retained message
       );
     }
 
-    promise_thing.then(() => {
+    pub.then(() => {
       this.ctx.IChans.removeAllDF();
       this.ctx.OChans.removeAllDF();
 
@@ -100,10 +100,10 @@ export class Client {
         { state: 'online', rev: this.ctx.rev },
         true, // retained message
       ).then(() => {
-        this._first_publish = true;
+        this.firstPub = true;
       });
 
-      this._is_reconnect = true;
+      this.IsReconnect = true;
 
       if (this.ctx.onConnect) {
         this.ctx.onConnect();
@@ -113,20 +113,20 @@ export class Client {
     });
   }
 
-  on_message(topic, message) {
-    if (topic == this.ctx.OChans.ctrl) {
+  onMessage(topic, message) {
+    if (topic === this.ctx.OChans.ctrl) {
       const signal = JSON.parse(message);
-      let handling_result = null;
+      let handlingResult = null;
       switch (signal.command) {
         case 'CONNECT':
           if ('idf' in signal) {
             const { idf } = signal;
             this.ctx.IChans.add(idf, signal.topic);
-            handling_result = this.ctx.onSignal(signal.command, [idf]);
+            handlingResult = this.ctx.onSignal(signal.command, [idf]);
           } else if ('odf' in signal) {
             const { odf } = signal;
             this.ctx.OChans.add(odf, signal.topic);
-            handling_result = this.ctx.onSignal(signal.command, [odf]);
+            handlingResult = this.ctx.onSignal(signal.command, [odf]);
             this.subscribe(this.ctx.OChans.topic(odf));
           }
           break;
@@ -134,25 +134,27 @@ export class Client {
           if ('idf' in signal) {
             const { idf } = signal;
             this.ctx.IChans.removeDF(idf);
-            handling_result = this.ctx.onSignal(signal.command, [idf]);
+            handlingResult = this.ctx.onSignal(signal.command, [idf]);
           } else if ('odf' in signal) {
             const { odf } = signal;
             this.unsubscribe(this.ctx.OChans.topic(odf));
             this.ctx.OChans.removeDF(odf);
-            handling_result = this.ctx.onSignal(signal.command, [odf]);
+            handlingResult = this.ctx.onSignal(signal.command, [odf]);
           }
           break;
+        default:
+          throw new Error('unknown signal');
       }
-      const res_message = {
+      const resMsg = {
         msg_id: signal.msg_id,
       };
-      if (typeof handling_result === 'boolean' && handling_result) {
-        res_message.state = 'ok';
+      if (typeof handlingResult === 'boolean' && handlingResult) {
+        resMsg.state = 'ok';
       } else {
-        res_message.state = 'error';
-        res_message.reason = handling_result[1];
+        resMsg.state = 'error';
+        [, resMsg.reason] = handlingResult;
       }
-      this.publish(this.ctx.IChans.ctrl, res_message);
+      this.publish(this.ctx.IChans.ctrl, resMsg);
     } else {
       const odf = this.ctx.OChans.df(topic);
       if (!odf) return;
@@ -173,11 +175,11 @@ export class Client {
     }
 
     this.ctx.url = params.url;
-    if (!this.ctx.url || this.ctx.url == '') {
+    if (!this.ctx.url || this.ctx.url === '') {
       throw new RegistrationError(`Invalid url: ${this.ctx.url}`);
     }
 
-    this.ctx.appID = params.id || _UUID();
+    this.ctx.appID = params.id || UUID();
 
     const body = {
       name: params.name,
@@ -196,7 +198,7 @@ export class Client {
     // filter out the empty `df_list`, in case of empty list, server reponsed 403.
     ['idf_list', 'odf_list'].forEach(
       (x) => {
-        if (Array.isArray(body[x]) && body[x].length == 0) delete body[x];
+        if (Array.isArray(body[x]) && body[x].length === 0) delete body[x];
       },
     );
 
@@ -215,8 +217,7 @@ export class Client {
         this.ctx.mqttPort = metadata.url.ws_port;
         this.ctx.mqttUsername = metadata.username || '';
         this.ctx.mqttPassword = metadata.password || '';
-        this.ctx.IChans.ctrl = metadata.ctrl_chans[0];
-        this.ctx.OChans.ctrl = metadata.ctrl_chans[1];
+        [this.ctx.IChans.ctrl, this.ctx.OChans.ctrl] = metadata.ctrl_chans;
         this.ctx.rev = metadata.rev;
 
         this.ctx.mqttClient = mqtt.connect(`${metadata.url.ws_scheme}://${this.ctx.mqttHost}:${this.ctx.mqttPort}`, {
@@ -241,14 +242,15 @@ export class Client {
           console.error('mqtt_error', error);
         });
         this.ctx.mqttClient.on('message', (topic, message, packet) => {
-          this.on_message(topic, message.toString()); // Convert message from Uint8Array to String
+          // Convert message from Uint8Array to String
+          this.onMessage(topic, message.toString(), packet);
         });
 
         this.ctx.onSignal = params.onSignal;
         this.ctx.onData = params.onData;
 
         setTimeout(() => {
-          if (!this._first_publish) {
+          if (!this.firstPub) {
             throw new RegistrationError('MQTT connection timeout');
           }
         }, 5000);
@@ -278,7 +280,7 @@ export class Client {
       .type('json')
       .accept('json')
       .send(JSON.stringify({ rev: this.ctx.rev }))
-      .then((res) => {
+      .then(() => {
         this.ctx.mqttClient = null;
         if (this.ctx.onDeregister) {
           this.ctx.onDeregister();
@@ -288,11 +290,11 @@ export class Client {
       });
   }
 
-  push(idf_name, data, qos) {
-    if (!this.ctx.mqttClient || !this._first_publish) {
+  push(idf, data, qos) {
+    if (!this.ctx.mqttClient || !this.firstPub) {
       throw new RegistrationError('Not registered');
     }
-    if (!this.ctx.IChans.topic(idf_name)) {
+    if (!this.ctx.IChans.topic(idf)) {
       return;
     }
     if (qos === undefined) qos = 1;
@@ -301,20 +303,20 @@ export class Client {
       data = [data];
     }
 
-    this.publish(this.ctx.IChans.topic(idf_name), data, false, qos);
+    this.publish(this.ctx.IChans.topic(idf), data, false, qos);
   }
 }
 
-const _default_client = new Client();
+const defaultClient = new Client();
 
 export function register(...args) {
-  return _default_client.register(...args);
+  return defaultClient.register(...args);
 }
 
-export function deregister() {
-  return _default_client.deregister();
+export function deregister(...args) {
+  return defaultClient.deregister(...args);
 }
 
 export function push(...args) {
-  return _default_client.push(...args);
+  return defaultClient.push(...args);
 }
