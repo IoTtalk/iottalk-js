@@ -73,7 +73,7 @@ export class Client {
       promise_thing = this.subscribe(this.ctx.o_chans.ctrl)
         .then(() => {
           console.log(`Successfully connect to ${this.ctx.url}`);
-          console.log(`Device ID: ${this.ctx.app_id}`);
+          console.log(`Device ID: ${this.ctx.appID}`);
           console.log(`Device name: ${this.ctx.name}.`);
           if (typeof (document) !== 'undefined') {
             document.title = this.ctx.name;
@@ -161,7 +161,7 @@ export class Client {
   }
 
   onDisconnect() {
-    console.info(`${this.ctx.name} (${this.ctx.app_id}) disconnected from ${this.ctx.url}.`);
+    console.info(`${this.ctx.name} (${this.ctx.appID}) disconnected from ${this.ctx.url}.`);
     if (this.ctx.onDisconnect) {
       this.ctx.onDisconnect();
     }
@@ -177,7 +177,7 @@ export class Client {
       throw new RegistrationError(`Invalid url: ${this.ctx.url}`);
     }
 
-    this.ctx.app_id = params.id || _UUID();
+    this.ctx.appID = params.id || _UUID();
 
     const body = {
       name: params.name,
@@ -200,7 +200,7 @@ export class Client {
       },
     );
 
-    superagent.put(`${this.ctx.url}/${this.ctx.app_id}`)
+    superagent.put(`${this.ctx.url}/${this.ctx.appID}`)
       .type('json')
       .accept('json')
       .send(body)
@@ -220,7 +220,7 @@ export class Client {
         this.ctx.rev = metadata.rev;
 
         this.ctx.mqtt_client = mqtt.connect(`${metadata.url.ws_scheme}://${this.ctx.mqtt_host}:${this.ctx.mqtt_port}`, {
-          clientId: `iottalk-js-${this.ctx.app_id}`,
+          clientId: `iottalk-js-${this.ctx.appID}`,
           username: this.ctx.mqtt_username,
           password: this.ctx.mqtt_password,
           will: {
@@ -274,7 +274,7 @@ export class Client {
     );
     this.ctx.mqtt_client.end();
 
-    superagent.del(`${this.ctx.url}/${this.ctx.app_id}`)
+    superagent.del(`${this.ctx.url}/${this.ctx.appID}`)
       .type('json')
       .accept('json')
       .send(JSON.stringify({ rev: this.ctx.rev }))

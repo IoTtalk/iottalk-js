@@ -3,7 +3,7 @@ import ChannelPool from './channel-pool';
 export default class {
   constructor() {
     this.url = null;
-    this.app_id = null;
+    this.appID = null;
     this.name = null;
     this.mqtt_host = null;
     this.mqtt_port = null;
