@@ -77,14 +77,28 @@ const Dummy_Sensor  = () => { ... };
 const Dummy_Control = () => { ... };
 
 const da = new iottalkjs.DAI({
-    apiUrl: 'https://example.com/csm',
-    deviceModel: 'Dummy_Device',
-    deviceName: 'MyMagicDevice',
-    deviceAddr: '0a14943f-cc88-4f36-a441-dc3f42f03546',
-    persistentBinding: true,
-    idfList: [[Dummy_Sensor, ['dB']]],
-    odfList: [[Dummy_Control, ['dB']]],
-  });
+  apiUrl: 'https://example.com/csm',
+  deviceModel: 'Dummy_Device',
+  deviceName: 'MyMagicDevice',
+  deviceAddr: '0a14943f-cc88-4f36-a441-dc3f42f03546',
+  persistentBinding: true,
+  idfList: [[Dummy_Sensor, ['dB']]],
+  odfList: [[Dummy_Control, ['dB']]],
+});
+```
+
+Example of DF name conversion, the valid underscore suffix in function name will be converted to df naming rules:
+
+```javascript
+const Acceleration_I = () => { ... };
+
+const da = new iottalkjs.DAI({
+ ...
+ idfList: [Acceleration_I, ['g']],
+ inverval: {
+   'Acceleration-I': 42,
+ },
+});
 ```
 
 #### `run()`
