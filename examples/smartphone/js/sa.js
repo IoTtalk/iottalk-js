@@ -26,7 +26,7 @@ $(() => {
       AyDom.text(acc.y);
       AzDom.text(acc.z);
 
-      dan.push('Acceleration', [acc.x, acc.y, acc.z]);
+      dan.push('Acceleration-I', [acc.x, acc.y, acc.z]);
     };
   };
 
@@ -34,7 +34,7 @@ $(() => {
     apiUrl: 'https://iottalk2.tw/csm',
     deviceModel: 'Smartphone',
     deviceName,
-    idfList: [['Acceleration', ['g', 'g', 'g']]],
+    idfList: [['Acceleration-I', ['g', 'g', 'g']]],
     onRegister,
   });
 
