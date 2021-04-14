@@ -57,9 +57,10 @@ yarn add iottalk-js
 - `deviceWebpage` (`string`)
 - `onRegister` (`function`): A callback function with signature `function (dan)`.
                              The first argument is the instance of `iottalkjs.DAN.Client`.
-- `onDeregister` (`function`): A callback function with signature `function ()`.
+- `onDeregister` (`function`): A callback function with signature `function (dan)`.
 - `onConnect` (`function`): A callback invoked on MQTT broker connected.
-- `onDisconnect` (`function`)
+                            The signature is `function (dan)`.
+- `onDisconnect` (`function`): A callback function with signature `function (dan)`.
 - `pushInterval` (`number`): The push interval in second.
 - `interval` (`object`): The key is the device feature name in `string`.
 - `idfList` (`Array`): Should be a list of `idf, unit` pairs.
