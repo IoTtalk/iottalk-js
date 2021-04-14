@@ -106,7 +106,7 @@ export class Client {
       this.IsReconnect = true;
 
       if (this.ctx.onConnect) {
-        this.ctx.onConnect();
+        this.ctx.onConnect(this);
       }
     }).catch((err) => {
       console.error(err);
@@ -165,7 +165,7 @@ export class Client {
   onDisconnect() {
     console.info(`${this.ctx.name} (${this.ctx.appID}) disconnected from ${this.ctx.url}.`);
     if (this.ctx.onDisconnect) {
-      this.ctx.onDisconnect();
+      this.ctx.onDisconnect(this);
     }
   }
 
@@ -283,7 +283,7 @@ export class Client {
       .then(() => {
         this.ctx.mqttClient = null;
         if (this.ctx.onDeregister) {
-          this.ctx.onDeregister();
+          this.ctx.onDeregister(this);
         }
       }, (err) => {
         console.error('deregister fail', err);
