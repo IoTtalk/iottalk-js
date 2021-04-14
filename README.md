@@ -56,7 +56,7 @@ yarn add iottalk-js
 - `extraSetupWebpage` (`string`)
 - `deviceWebpage` (`string`)
 - `onRegister` (`function`): A callback function with signature `function (dan)`.
-                             the first argument is the instance of ``iottalkjs.DAN.Client`.
+                             The first argument is the instance of `iottalkjs.DAN.Client`.
 - `onDeregister` (`function`): A callback function with signature `function ()`.
 - `onConnect` (`function`): A callback invoked on MQTT broker connected.
 - `onDisconnect` (`function`)
