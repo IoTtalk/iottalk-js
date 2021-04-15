@@ -25,7 +25,8 @@ The full build artifacts are here: https://github.com/IoTtalk/iottalk-js/tree/gh
 ### Examples
 
 - [Dummy_Device](./examples/Dummy_Device/)
-- [Smartphone DA](./examples/smartphone/): this is a demo of event-driven push.
+- [Dummy_Device_Table](./examples/Dummy_Device_Table/): A much pretty demo of Dummy_Device.
+- [Smartphone DA](./examples/smartphone/): This is a demo of event-driven push.
 
 ### Install via NPM or Yarn
 
