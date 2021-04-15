@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const table = document.getElementById(id);
     table.appendChild(row);
 
-    if (table.rows.length > 5) {
+    if (table.rows.length > 10 + 1) {
       table.deleteRow(1);
     }
   }
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     odfList: [Dummy_Control],
     pushInterval: 0,
     interval: {
-      Dummy_Sensor: 1,
+      Dummy_Sensor: 1/24,
     },
   };
 

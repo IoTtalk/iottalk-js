@@ -8,25 +8,38 @@
 
   <style>
     table {
+      table-layout: fixed;
       font-family: arial, sans-serif;
       border-collapse: collapse;
-      width: 100%;
+      width: 80%;
     }
+
     td, th {
       border: 1px solid #ABB2B9;
       text-align: left;
       padding: 8px;
     }
-    tr:nth-child(1) {
+
+    th {
       background-color: #dddddd;
     }
 
     * {
       box-sizing: border-box;
     }
+
+    col.timestamp {
+      width: 30%;
+    }
+
+    col.value {
+      width: 70%;
+    }
+
     .row {
       display: flex;
     }
+
     /* Create two equal columns that sits next to each other */
     .column {
       flex: 50%;
@@ -41,20 +54,28 @@
   <div class="row">
       <div class="column" style="margin-left:100px">
         <h3>Dummy_Sensor</h3>
-        <table style="width:80%" id="dummy-sensor">
+        <table id="dummy-sensor">
+          <colgroup>
+            <col class="timestamp"/>
+            <col class="value"/>
+          </colgroup>
           <tr>
-            <th>time</th>
-            <th>value</th>
+            <th>Timestamp</th>
+            <th>Value</th>
           </tr>
         </table>
       </div>
 
       <div class="column">
         <h3>Dummy_Control</h3>
-        <table style="width:80%" id="dummy-control">
+        <table id="dummy-control">
+          <colgroup>
+            <col class="timestamp"/>
+            <col class="value"/>
+          </colgroup>
           <tr>
-            <th>time</th>
-            <th>value</th>
+            <th>Timestamp</th>
+            <th>Value</th>
           </tr>
         </table>
       </div>
