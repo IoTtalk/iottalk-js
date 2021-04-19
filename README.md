@@ -25,7 +25,8 @@ The full build artifacts are here: https://github.com/IoTtalk/iottalk-js/tree/gh
 ### Examples
 
 - [Dummy_Device](./examples/Dummy_Device/)
-- [Smartphone DA](./examples/smartphone/): this is a demo of event-driven push.
+- [Dummy_Device_Table](./examples/Dummy_Device_Table/): A much pretty demo of Dummy_Device.
+- [Smartphone DA](./examples/smartphone/): This is a demo of event-driven push.
 
 ### Install via NPM or Yarn
 
@@ -56,10 +57,11 @@ yarn add iottalk-js
 - `extraSetupWebpage` (`string`)
 - `deviceWebpage` (`string`)
 - `onRegister` (`function`): A callback function with signature `function (dan)`.
-                             the first argument is the instance of ``iottalkjs.DAN.Client`.
-- `onDeregister` (`function`): A callback function with signature `function ()`.
+                             The first argument is the instance of `iottalkjs.DAN.Client`.
+- `onDeregister` (`function`): A callback function with signature `function (dan)`.
 - `onConnect` (`function`): A callback invoked on MQTT broker connected.
-- `onDisconnect` (`function`)
+                            The signature is `function (dan)`.
+- `onDisconnect` (`function`): A callback function with signature `function (dan)`.
 - `pushInterval` (`number`): The push interval in second.
 - `interval` (`object`): The key is the device feature name in `string`.
 - `idfList` (`Array`): Should be a list of `idf, unit` pairs.
@@ -77,14 +79,28 @@ const Dummy_Sensor  = () => { ... };
 const Dummy_Control = () => { ... };
 
 const da = new iottalkjs.DAI({
-    apiUrl: 'https://example.com/csm',
-    deviceModel: 'Dummy_Device',
-    deviceName: 'MyMagicDevice',
-    deviceAddr: '0a14943f-cc88-4f36-a441-dc3f42f03546',
-    persistentBinding: true,
-    idfList: [[Dummy_Sensor, ['dB']]],
-    odfList: [[Dummy_Control, ['dB']]],
-  });
+  apiUrl: 'https://example.com/csm',
+  deviceModel: 'Dummy_Device',
+  deviceName: 'MyMagicDevice',
+  deviceAddr: '0a14943f-cc88-4f36-a441-dc3f42f03546',
+  persistentBinding: true,
+  idfList: [[Dummy_Sensor, ['dB']]],
+  odfList: [[Dummy_Control, ['dB']]],
+});
+```
+
+Example of DF name conversion, the valid underscore suffix in function name will be converted to df naming rules:
+
+```javascript
+const Acceleration_I = () => { ... };
+
+const da = new iottalkjs.DAI({
+ ...
+ idfList: [Acceleration_I, ['g']],
+ inverval: {
+   'Acceleration-I': 42,
+ },
+});
 ```
 
 #### `run()`
