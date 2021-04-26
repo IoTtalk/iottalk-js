@@ -146,10 +146,12 @@ export default class {
 
     // FIXME: window is not defined in node.js
     // eslint-disable-next-line func-names
+    window.persistentBinding = this.persistentBinding;
+    window.dan = this.dan;
     window.onbeforeunload = function () {
       try {
-        if (!this.persistentBinding) {
-          this.dan.deregister();
+        if (!persistentBinding) {
+          dan.deregister();
         }
       } catch (error) {
         console.error(`dai process cleanup exception: ${error}`);
