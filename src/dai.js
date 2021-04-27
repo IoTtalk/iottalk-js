@@ -93,7 +93,7 @@ export default class {
 
     if (this.persistentBinding && !this.deviceAddr) {
       throw new ArgumentError('In case of `persistentBinding` set to `True`, '
-        + 'the `deviceAddr` should be set and fixed.');
+                + 'the `deviceAddr` should be set and fixed.');
     }
 
     if (Object.keys(this.device_features).length === 0) throw new RegistrationError('Neither idfList nor odfList is empty.');
@@ -146,13 +146,12 @@ export default class {
 
     // FIXME: window is not defined in node.js
     // eslint-disable-next-line func-names
-    window.persistentBinding = this.persistentBinding;
-    window.dan = this.dan;
-    window.onbeforeunload = function () {
+    window.onbeforeunload = () => {
       try {
-        if (!persistentBinding) {
-          dan.deregister();
+        if (this.persistentBinding) {
+          return;
         }
+        this.dan.deregister();
       } catch (error) {
         console.error(`dai process cleanup exception: ${error}`);
       }
