@@ -11,7 +11,7 @@ The library will export a global variable `window.iottalkjs`.
 We provide minified file served from GitHub pages:
 
 ```html
-<script src="https://iottalk.github.io/iottalk-js/iottalkjs-v2.3.0.js"></script>
+<script src="https://iottalk.github.io/iottalk-js/iottalkjs-v2.3.1.js"></script>
 ```
 
 There is a pointer for latest master build, it's unstable.
