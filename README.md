@@ -89,7 +89,7 @@ const da = new iottalkjs.DAI({
 });
 ```
 
-Example of DF name conversion, the valid underscore suffix in function name will be converted to df naming rules:
+Example of DF name conversion, the valid underscore suffix (_) in function name will be converted to df naming rules (-):
 
 ```javascript
 const Acceleration_I = () => { ... };
