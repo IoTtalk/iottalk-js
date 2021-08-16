@@ -134,5 +134,7 @@ For web only build, there is a target `build:web`.
 ```
 yarn login
 yarn run build
+rm examples/Dummy_Device/build examples/smartphone/build # the symlinks block the publishing
 yarn publish
+git checkout -- examples/Dummy_Device/build examples/smartphone/build
 ```
