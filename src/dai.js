@@ -12,6 +12,7 @@ export default class {
     this.username = option.username;
     this.extraSetupWebpage = option.extraSetupWebpage || '';
     this.deviceWebpage = option.deviceWebpage || '';
+    this.profile = option.profile || {};
 
     this.onRegister = option.onRegister;
     this.onDeregister = option.onDeregister;
@@ -97,6 +98,8 @@ export default class {
     }
 
     if (Object.keys(this.device_features).length === 0) throw new RegistrationError('Neither idfList nor odfList is empty.');
+
+    if (typeof this.profile !== 'object') throw new RegistrationError('Profile must be a dict.');
   }
 
   run() {
@@ -115,6 +118,13 @@ export default class {
       }
     });
 
+    Object.assign(this.profile, {
+      model: this.deviceModel,
+      u_name: this.username,
+      extra_setup_webpage: this.extraSetupWebpage,
+      device_webpage: this.deviceWebpage,
+    });
+
     const option = {
       url: this.apiUrl,
       onSignal: this.onSignal,
@@ -124,12 +134,7 @@ export default class {
       idfList,
       odfList,
       name: this.deviceName,
-      profile: {
-        model: this.deviceModel,
-        u_name: this.username,
-        extra_setup_webpage: this.extraSetupWebpage,
-        device_webpage: this.deviceWebpage,
-      },
+      profile: this.profile,
       onRegister: this.onRegister,
       onDeregister: this.onDeregister,
       onConnect: this.onConnect,
