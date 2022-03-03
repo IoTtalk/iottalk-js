@@ -81,7 +81,7 @@ export default class {
   }
 
   static DFNameFromFunc(DFName) {
-    if (DFName.match(/_[A-Z]?(I|O)[0-9]?$/i)) {
+    if (DFName.match(/_[A-Z]?(I|O)[0-9]*$/i)) {
       return DFName.replace('_', '-');
     }
     return DFName;
