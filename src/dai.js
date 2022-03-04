@@ -151,7 +151,9 @@ export default class {
 
     // FIXME: window is not defined in node.js
     // eslint-disable-next-line func-names
-    window.onbeforeunload = () => {
+    let existingHandler = window.onbeforeunload;
+    window.onbeforeunload = (event) => {
+      if (existingHandler) existingHandler(event);
       if (this.persistentBinding) {
         return;
       }
