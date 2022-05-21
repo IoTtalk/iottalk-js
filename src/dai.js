@@ -34,20 +34,30 @@ export default class {
 
   pushData(DFName) {
     if (this.device_features[DFName].pushData == null) return;
-    const interval = this.interval[DFName] !== undefined
-      ? this.interval[DFName] : this.pushInterval;
-    console.debug(`${DFName} : ${this.flags[DFName]} [message / ${interval} s]`);
-    const pushInterval = setInterval(() => {
+    console.debug(`${DFName} : ${this.flags[DFName]}`);
+
+    const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+    const getInterval = () => {
+      const interval = this.interval[DFName] !== undefined
+        ? this.interval[DFName] : this.pushInterval;
+      return typeof interval === 'function' ? interval() : interval;
+    };
+
+    const execPush = () => {
       const data = this.device_features[DFName].pushData();
       if (!this.flags[DFName]) {
-        clearInterval(pushInterval);
         return;
       }
       if (data === undefined) {
         return;
       }
       this.dan.push(DFName, data);
-    }, interval * 1000);
+      sleep(getInterval() * 1000).then(() => {
+        execPush();
+      });
+    };
+    execPush();
   }
 
   onSignal(signal, DFList) {
