@@ -41,7 +41,7 @@ export default class {
     const getInterval = () => {
       const interval = this.interval[DFName] !== undefined
         ? this.interval[DFName] : this.pushInterval;
-      return typeof interval === 'function' ? interval() : interval;
+      return interval instanceof Function ? interval() : interval;
     };
 
     const execPush = () => {
